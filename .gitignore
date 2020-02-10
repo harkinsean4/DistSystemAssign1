@@ -3,4 +3,6 @@
 .classpath
 .project
 *.class
-
+*.sh
+src/server.policy
+src/client.policy
