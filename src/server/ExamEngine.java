@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ExamEngine implements ExamServer 
 {
-	private HashMap loginHashMap;
+	private HashMap<Integer, String> loginHashMap = new HashMap<Integer, String>();
 
     // Constructor is required
     public ExamEngine() 
@@ -17,6 +17,8 @@ public class ExamEngine implements ExamServer
         super();
         
         loginHashMap = new HashMap();
+        
+        loginHashMap.put(16316271, "fearghal");
     }
     
     public static void main(String[] args) {
@@ -52,22 +54,22 @@ public class ExamEngine implements ExamServer
     // Implement the methods defined in the ExamServer interface...
     // Return an access token that allows access to the server for some time period
     public int login(int studentid, String password) throws 
-                UnauthorizedAccess, RemoteException {
+                UnauthorizedAccess, RemoteException 
+                {
+    	
+	    String actualPassword = loginHashMap.get(studentid);
+	    
+	    if(actualPassword.equals(password))
+	    {
+	    	System.out.println("Successful log in by student " + studentid);
+	    	return 1;
+	    }
+	    else
+	    {
+	    	System.err.println("Login from " + studentid);
+	    	throw new UnauthorizedAccess("incorrect password for: " + studentid + ". Please try again");
+	    }
     
-//    if(loginHashMap.hash(studentid).equals(password))
-//    {
-//    	System.out.println("Successful log in by student " + studentid);
-//    	
-//    }
-//    else{
-//    	throw new UnauthorizedAccess("incorrect password for: " + studentid + ". Please try again");
-//    }
-    	System.err.println("Login from " + studentid);
-
-	// TBD: You need to implement this method!
-	// For the moment method just returns an empty or null value to allow it to compile
-
-	return 0;	
     }
 
     // Return a summary list of Assessments currently available for this studentid
