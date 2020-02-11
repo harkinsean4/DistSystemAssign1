@@ -1,3 +1,5 @@
 server.policy
 client.policy
+src/client.policy
+src/server.policy
 *.policy
