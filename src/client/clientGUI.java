@@ -2,7 +2,9 @@ package client;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+
 import server.ExamEngine;
+import server.ExamServer;
 
 public class clientGUI 
 {
@@ -18,10 +20,10 @@ public class clientGUI
             System.setSecurityManager(new SecurityManager());
         }
         try {
-            String name = "ExamEngine";
+            String name = "ExamServer";
             Registry registry = LocateRegistry.getRegistry(registryport);
-            ExamEngine examEngine = (ExamEngine) registry.lookup(name);
-            examEngine.login(16316271, "fearghal");
+            ExamServer examServer = (ExamServer) registry.lookup(name);
+            examServer.login(16316271, "fearghal");
             
         } catch (Exception e) {
             System.err.println("clientGUI exception:");
