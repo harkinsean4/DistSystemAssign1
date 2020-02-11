@@ -20,6 +20,13 @@ public class ExamEngine implements ExamServer
     }
     
     public static void main(String[] args) {
+		int registryport = 20345;
+
+        if (args.length > 0)
+           registryport = Integer.parseInt(args[0]);
+        
+        System.out.println("RMIRegistry port = " + registryport);
+		
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
@@ -28,7 +35,8 @@ public class ExamEngine implements ExamServer
             ExamServer engine = new ExamEngine();
             ExamServer stub =
                 (ExamServer) UnicastRemoteObject.exportObject(engine, 0);
-            Registry registry = LocateRegistry.getRegistry();
+            Registry registry = LocateRegistry.getRegistry(registryport);
+			System.setProperty("java.rmi.server.hostname","127.0.1.1;");
             registry.rebind(name, stub);
             System.out.println("ExamEngine bound");
         } catch (Exception e) {
