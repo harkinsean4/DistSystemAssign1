@@ -33,10 +33,14 @@ public class ExamEngine implements ExamServer
         try {
             String name = "ExamServer";
             ExamServer engine = new ExamEngine();
+            
+            // Exam Server is a remote object - RMI passes a remote stub to the client for a remote object
+            // client can invoke methods on the stub
             ExamServer stub =
                 (ExamServer) UnicastRemoteObject.exportObject(engine, 0);
+            
             Registry registry = LocateRegistry.getRegistry(registryport);
-			//System.setProperty("java.rmi.server.hostname","127.0.1.1;");
+			System.setProperty("java.rmi.server.hostname","127.0.1.1;");
             registry.rebind(name, stub);
             System.out.println("ExamEngine bound");
         } catch (Exception e) {
@@ -58,6 +62,7 @@ public class ExamEngine implements ExamServer
 //    else{
 //    	throw new UnauthorizedAccess("incorrect password for: " + studentid + ". Please try again");
 //    }
+    	System.err.println("Login from " + studentid);
 
 	// TBD: You need to implement this method!
 	// For the moment method just returns an empty or null value to allow it to compile
