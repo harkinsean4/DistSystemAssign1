@@ -36,7 +36,7 @@ public class ExamEngine implements ExamServer
             ExamServer stub =
                 (ExamServer) UnicastRemoteObject.exportObject(engine, 0);
             Registry registry = LocateRegistry.getRegistry(registryport);
-			System.setProperty("java.rmi.server.hostname","127.0.1.1;");
+			//System.setProperty("java.rmi.server.hostname","127.0.1.1;");
             registry.rebind(name, stub);
             System.out.println("ExamEngine bound");
         } catch (Exception e) {
