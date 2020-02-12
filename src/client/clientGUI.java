@@ -3,6 +3,7 @@ package client;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 
 import server.Assessment;
 import server.ExamServer;
@@ -12,6 +13,8 @@ import server.UnauthorizedAccess;
 public class clientGUI 
 {
 	private static ExamServer examServer = null;
+	private static int accessToken;
+	private static ArrayList<Assessment> clientAssessmentList = new ArrayList<Assessment>();
 	
 	public static void main(String args[]) {
         int registryport = 20345;
@@ -34,10 +37,10 @@ public class clientGUI
         }
 
 		try {
-			int loginBool = examServer.login(1631621, "fearghal");
+			accessToken = examServer.login(16316271, "fearghal");
 			
-			if (loginBool == 1){
-	        	System.out.println("Successful login");
+			if (accessToken != 0){
+	        	System.out.println("Successful login, access token for client is: " + accessToken);
 	        }
 	        else{
 	        	System.err.println("unsuccessful login");
@@ -52,9 +55,13 @@ public class clientGUI
 		}
 		
 		try {
-			Assessment assessment = examServer.getAssessment(1, 16316271, "CT414");
+			Assessment assessment = examServer.getAssessment(accessToken, 16316271, "CT414");
+			
+			clientAssessmentList.add(assessment);
 			
 			System.out.println(assessment.getInformation());
+			
+			examServer.submitAssessment(accessToken, 16316271, assessment);
 			
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
@@ -67,6 +74,27 @@ public class clientGUI
 			System.err.println("Assesment for that course code does not exist");
 			e.printStackTrace();
 		}
-       
+		/*
+		Assessment assessmentToSubmmit = clientAssessmentList.get(0);
+		
+		if (assessmentToSubmmit == null)
+		{
+			try {
+				examServer.submitAssessment(accessToken, 16316271, assessmentToSubmmit);
+			} catch (RemoteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnauthorizedAccess e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoMatchingAssessment e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("Assessment submitted");
+		}
+		else{
+			System.err.println("No assesment to submit");
+		}*/
     }
 }
