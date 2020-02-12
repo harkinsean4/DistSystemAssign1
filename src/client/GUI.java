@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.Serializable;
 
+import javax.security.auth.spi.LoginModule;
+import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,6 +17,8 @@ import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 
 
@@ -27,6 +31,7 @@ public class GUI extends JFrame implements Serializable {
 	private JTextField 	userInput;
 	private JPasswordField passInput;
 	private JButton 	login;
+	private ButtonModel loginMo;
 	
 	private JTextArea 	assessmentInfo, questionField;
     private JLabel 		dueDate, 		studentNumber, 	option1Text,
@@ -41,11 +46,20 @@ public class GUI extends JFrame implements Serializable {
 	private Font regText = new Font("Arial", Font.PLAIN, 18);
 	
 	public GUI() {
-		loginPage();
+		
+		JFrame fr = new JFrame("RSI Assessment");
+		loginPage(fr);
+		
+//		System.out.println(loggable);
+//		
+//		while (loggable != true) {
+//			assessmentPage(fr);
+//		}
 	}
 	
-	public void assessmentPage() {
-		JFrame fr = new JFrame("RSI Assessment");
+	public void assessmentPage(JFrame frame) {
+		
+		frame.remove(loginPage);
 		
 		information = new JPanel(new GridBagLayout());
 		GridBagConstraints b = new GridBagConstraints();
@@ -131,19 +145,24 @@ public class GUI extends JFrame implements Serializable {
 		
 		assessmentPage.add(questions, BorderLayout.CENTER);
 		
-		fr.getContentPane().add(assessmentPage);
+		frame.getContentPane().add(assessmentPage);
 		
-		fr.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-	    fr.setSize(800, 400);
-	    fr.setLocation(100, 100);
-	    fr.setVisible(true);
-		
+		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+	    frame.setSize(800, 400);
+	    frame.setLocation(100, 100);
+	    frame.setVisible(true);
 		
 	}
 	
-	public void loginPage() {
-		JFrame fr = new JFrame("RSI Assessment");
+	public void close(JFrame f) 
+	{
 		
+	}
+	
+	public void loginPage(JFrame frame) {
+//		frame = new JFrame("RSI Assessment");
+		
+
 		loginPage = new JPanel(new GridBagLayout());
 		GridBagConstraints a = new GridBagConstraints();
 		
@@ -184,12 +203,28 @@ public class GUI extends JFrame implements Serializable {
 	    a.gridwidth = 2;
 	    loginPage.add(login, a);
 	    
-	    fr.getContentPane().add(loginPage);
+	    loginMo = login.getModel();
 	    
-	    fr.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        fr.setSize(600, 400);
-        fr.setLocation(100, 100);
-        fr.setVisible(true);
+	    loginMo.addChangeListener(new ChangeListener(){
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if(loginMo.isPressed()) {
+					System.out.println("login pressed");
+					
+					clientGUI newClient = new clientGUI();
+					assessmentPage(frame);
+				}
+			}
+	    });
+	    
+	    
+	    frame.getContentPane().add(loginPage);
+	    
+	    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        frame.setSize(600, 400);
+        frame.setLocation(100, 100);
+        frame.setVisible(true);
 	}
 	
 	
