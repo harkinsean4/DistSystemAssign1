@@ -25,7 +25,7 @@ public class CommsAssessment implements Assessment
 	}
 
 	public String getInformation() {
-		String information = "MCQ Assessment for" + ASSESSMENTNAME;
+		String information = "MCQ Assessment for " + ASSESSMENTNAME;
 		
 		return information;
 	}

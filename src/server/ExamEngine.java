@@ -6,13 +6,14 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class ExamEngine implements ExamServer 
 {
 	private HashMap<Integer, String> loginHashMap = new HashMap<Integer, String>();
-	//private HashMap<Integer, ArrayList<Assessment>> assessmentHashMap = new HashMap<Integer, Assessment[]>();
+	private HashMap<Integer, ArrayList<Assessment>> assessmentHashMap = new HashMap<Integer, ArrayList<Assessment>>();
 	private static String DISTCOURSECODE = "CT414";
 	private static String COMMSCOURSECODE = "EE444";
 	private static int ACCESSTOKEN = 0;
@@ -91,8 +92,6 @@ public class ExamEngine implements ExamServer
     public List<String> getAvailableSummary(int token, int studentid) throws
                 UnauthorizedAccess, NoMatchingAssessment, RemoteException {
 
-        
-
         return null;
     }
 
@@ -102,30 +101,75 @@ public class ExamEngine implements ExamServer
     	
     	Assessment assessmentObj = null;
     	
-    	
     	if (courseCode.equals(DISTCOURSECODE))
     	{
+    		System.out.println("getAssessment() for: " + courseCode);
     		assessmentObj = new DistAssessment(studentid);
     	}
-    	if (courseCode.equals(COMMSCOURSECODE))
+    	else if (courseCode.equals(COMMSCOURSECODE))
     	{
+    		System.out.println("getAssessment() for: " + courseCode);
     		assessmentObj = new CommsAssessment(studentid);
     	}
     	else{
     		throw new NoMatchingAssessment("No matching assessment for course code: " + courseCode);
     	}
     	
+    	ArrayList assmentArrayList = null;
+    	
+    	if (assessmentHashMap.containsKey(studentid)) 
+    	{
+    		// if student has submitted an assessment before, we want to make sure to add it to list correctly
+    		assmentArrayList = assessmentHashMap.get(studentid);
+    		System.out.println("getAssessment() assessment array List for " + studentid);
+    		
+    		if (assmentArrayList == null){
+    			System.out.println("assmentArrayList for " + studentid + " is null");
+    			
+    			assmentArrayList = new ArrayList<Assessment>();
+    			assmentArrayList.add(assessmentObj);
+    		}
+    	} 
+    	else
+    	{
+    		// if student has never submitted an assessment before
+    		assmentArrayList = new ArrayList<Assessment>();
+			assmentArrayList.add(assessmentObj);
+    	}
+    	
+    	assessmentHashMap.put(studentid, assmentArrayList);
+    	
         return assessmentObj;
     }
 
     // Submit a completed assessment
     public void submitAssessment(int token, int studentid, Assessment completed) throws 
-                UnauthorizedAccess, NoMatchingAssessment, RemoteException {
+                UnauthorizedAccess, NoMatchingAssessment, RemoteException 
+                {
+    	System.out.println("submitAssessment() for: " + studentid);
+    	
+    	ArrayList assmentArrayList = null;
 
-    	//Assessment[] assessmentList = assessmentHashMap.get(studentid);
+    	if (assessmentHashMap.containsKey(studentid)) 
+    	{
+    		assmentArrayList = assessmentHashMap.get(studentid);
+    		System.out.println("get Assessment Array List for " + studentid);
+    		
+    		if (assmentArrayList == null){
+    			System.out.println("assmentArrayList for " + studentid + " is null");
+    			assmentArrayList = new ArrayList<Assessment>();
+    		}
+    	} 
+    	else 
+    	{
+    		System.err.println("assessmentHashMap does not have a key for studentid " + studentid);
+    	    throw new UnauthorizedAccess("No account credentials exist for: " + studentid + "Make sure student ID is correct and try again");
+    	}
     	
-    	//assessmentList.
+    	assmentArrayList.add(completed);
     	
-    	//assessmentHashMap.put(studentid, arg1)
+    	System.out.println("Inserting completed assessment: " + completed.getInformation());
+    	
+    	assessmentHashMap.put(studentid, assmentArrayList);
     }
 }
