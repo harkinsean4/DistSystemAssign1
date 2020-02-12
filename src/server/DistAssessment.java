@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DistAssessment implements Assessment 
 {
-	private static String ASSESSMENTNAME = "Distributed Systems CT414";
+	private static String ASSESSMENTNAME = "CT414";
 	private int studentID = 0;
 	private Date closingDate = null;
 	private ArrayList<Question> questionList = new ArrayList<Question>();
@@ -25,7 +25,7 @@ public class DistAssessment implements Assessment
 	}
 
 	public String getInformation() {
-		String information = "MCQ Assessment for " + ASSESSMENTNAME;
+		String information = ASSESSMENTNAME;
 		
 		return information;
 	}

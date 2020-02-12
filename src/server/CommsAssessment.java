@@ -11,7 +11,7 @@ import java.util.List;
 
 public class CommsAssessment implements Assessment 
 {
-	private static String ASSESSMENTNAME = "Communications and Signals EE444";
+	private static String ASSESSMENTNAME = "EE444";
 	private int studentID = 0;
 	private Date closingDate = null;
 	private ArrayList<Question> questionList = new ArrayList<Question>();
@@ -25,7 +25,7 @@ public class CommsAssessment implements Assessment
 	}
 
 	public String getInformation() {
-		String information = "MCQ Assessment for " + ASSESSMENTNAME;
+		String information = ASSESSMENTNAME;
 		
 		return information;
 	}
