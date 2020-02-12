@@ -12,6 +12,7 @@ import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
@@ -25,7 +26,8 @@ import javax.swing.event.ChangeListener;
 public class GUI extends JFrame implements Serializable {
 	
 	private JPanel 		information, 	questions, 		loginPage, 
-						assessmentPage;
+						assessmentPage,	sideView, 		west,
+						east;
 	
 	private JLabel 		username, 		password;
 	private JTextField 	userInput;
@@ -35,9 +37,11 @@ public class GUI extends JFrame implements Serializable {
 	
 	private JTextArea 	assessmentInfo, questionField;
     private JLabel 		dueDate, 		studentNumber, 	option1Text,
-    					option2Text, 	option3Text;
+    					option2Text, 	option3Text, 	assignHeader;
 	private JButton 	submitAnswer;
 	private JRadioButton option1, 		option2, 		option3;
+	private JList 		availableAssessments;
+	private String[] assessments = {"CT414-1", "CT414-2", "EE444-1"};
 	
 	private int studentID = 12345678;
 	private String studentPassword;
@@ -87,8 +91,8 @@ public class GUI extends JFrame implements Serializable {
 		b.gridy = 4;
 		information.add(dueDate, b);
 		
-		assessmentPage = new JPanel( new BorderLayout());
-		assessmentPage.add(information, BorderLayout.NORTH);
+		east = new JPanel( new BorderLayout());
+		east.add(information, BorderLayout.NORTH);
 		
 		questions = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -143,12 +147,41 @@ public class GUI extends JFrame implements Serializable {
 		//c.gridwidth = 3;
 		questions.add(submitAnswer, c);
 		
-		assessmentPage.add(questions, BorderLayout.CENTER);
+		east.add(questions, BorderLayout.CENTER);
+		
+		//assessmentPage.add(questions, BorderLayout.CENTER);
+		
+		sideView = new JPanel(new GridBagLayout());
+		GridBagConstraints d = new GridBagConstraints();
+		
+		d.insets = new Insets(0,0,0,0);
+		
+		assignHeader = new JLabel("Assignments Available");
+		assignHeader.setFont(boldText);
+		d.gridx = 1;
+		d.gridy = 1;
+		sideView.add(assignHeader, d);
+		
+		availableAssessments = new JList(assessments);
+		availableAssessments.setVisibleRowCount(3);
+		availableAssessments.setFont(regText);
+		d.gridx = 1;
+		d.gridy = 20;
+		sideView.add(availableAssessments,d);
+		
+		west = new JPanel(new BorderLayout());
+		west.add(sideView, BorderLayout.WEST);
+		
+		assessmentPage = new JPanel( new BorderLayout());
+		
+		assessmentPage.add(east, BorderLayout.EAST);
+		assessmentPage.add(west, BorderLayout.WEST);
+		//assessmentPage.add(east, BorderLayout.EAST);
 		
 		frame.getContentPane().add(assessmentPage);
 		
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-	    frame.setSize(800, 400);
+	    frame.setSize(900, 400);
 	    frame.setLocation(100, 100);
 	    frame.setVisible(true);
 		
