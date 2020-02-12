@@ -1,5 +1,7 @@
 package server;
 
+//Assessment object is meant to hold the student ID
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -7,14 +9,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class mcqAssessment implements Assessment 
+public class DistAssessment implements Assessment 
 {
+	private static String ASSESSMENTNAME = "Distributed Systems CT414";
 	private int studentID = 0;
 	private Date closingDate = null;
 	private ArrayList<Question> questionList = new ArrayList<Question>();
 	private HashMap<Question, Integer> answerMap = new HashMap<Question, Integer>();
 	
-	public mcqAssessment(int studentID)
+	public DistAssessment(int studentID)
 	{
 		this.studentID = studentID;
 		questionList.add(new Question1());
@@ -22,7 +25,7 @@ public class mcqAssessment implements Assessment
 	}
 
 	public String getInformation() {
-		String information = "MCQ Assessment for Distributed Systems";
+		String information = "MCQ Assessment for" + ASSESSMENTNAME;
 		
 		return information;
 	}

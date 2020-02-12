@@ -4,8 +4,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import server.ExamEngine;
+import server.Assessment;
 import server.ExamServer;
+import server.NoMatchingAssessment;
 import server.UnauthorizedAccess;
 
 public class clientGUI 
@@ -33,7 +34,7 @@ public class clientGUI
         }
 
 		try {
-			int loginBool = examServer.login(16316271, "fearghal");
+			int loginBool = examServer.login(1631621, "fearghal");
 			
 			if (loginBool == 1){
 	        	System.out.println("Successful login");
@@ -49,6 +50,23 @@ public class clientGUI
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
+		
+		try {
+			Assessment assessment = examServer.getAssessment(1, 16316271, "CT414");
+			
+			System.out.println(assessment.getInformation());
+			
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnauthorizedAccess e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoMatchingAssessment e) {
+			// TODO Auto-generated catch block
+			System.err.println("Assesment for that course code does not exist");
+			e.printStackTrace();
+		}
+       
     }
 }
