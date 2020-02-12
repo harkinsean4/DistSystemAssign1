@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.List;
 
 import server.Assessment;
 import server.ExamServer;
@@ -61,7 +62,25 @@ public class clientGUI
 			
 			System.out.println(assessment.getInformation());
 			
+			System.out.println("Submit Assessment");
 			examServer.submitAssessment(accessToken, 16316271, assessment);
+			
+			System.out.println("Get Available Summary of Assessments ");
+			List<String> availableAssessments = examServer.getAvailableSummary(accessToken, 16316271);
+			
+			if (availableAssessments != null)
+			{
+				if(!availableAssessments.isEmpty())
+				{
+					for (int i = 0; i < availableAssessments.size(); i++)
+					{
+						System.out.println(availableAssessments.get(i));
+					}
+				}
+				else{
+					System.out.println("No available assessments");
+				}
+			}
 			
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block

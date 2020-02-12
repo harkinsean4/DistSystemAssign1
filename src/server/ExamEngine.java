@@ -13,10 +13,11 @@ import java.util.List;
 public class ExamEngine implements ExamServer 
 {
 	private HashMap<Integer, String> loginHashMap = new HashMap<Integer, String>();
-	private HashMap<Integer, ArrayList<Assessment>> assessmentHashMap = new HashMap<Integer, ArrayList<Assessment>>();
+	private HashMap<Integer, ArrayList<Assessment>> submittedAssessmentHashMap = new HashMap<Integer, ArrayList<Assessment>>();
 	private static String DISTCOURSECODE = "CT414";
 	private static String COMMSCOURSECODE = "EE444";
 	private static int ACCESSTOKEN = 0;
+	private List<String> courseList = new ArrayList<String>();
 
     // Constructor is required
     public ExamEngine() 
@@ -24,6 +25,8 @@ public class ExamEngine implements ExamServer
         super();
         
         loginHashMap = new HashMap();
+        courseList.add(DISTCOURSECODE);
+        courseList.add(COMMSCOURSECODE);
         
         loginHashMap.put(16316271, "fearghal");
     }
@@ -50,6 +53,7 @@ public class ExamEngine implements ExamServer
             
             Registry registry = LocateRegistry.getRegistry(registryport);
 			//System.setProperty("java.rmi.server.hostname","127.0.1.1;");
+            //System.setProperty("java.security.policy","file:/mnt/c/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/server.policy");
             registry.rebind(name, stub);
             System.out.println("ExamEngine bound");
         } catch (Exception e) {
@@ -89,10 +93,49 @@ public class ExamEngine implements ExamServer
     }
 
     // Return a summary list of Assessments currently available for this studentid
+    // it only returns assessments that have not been submitted yet 
     public List<String> getAvailableSummary(int token, int studentid) throws
-                UnauthorizedAccess, NoMatchingAssessment, RemoteException {
+                UnauthorizedAccess, NoMatchingAssessment, RemoteException 
+    {
+    	List<String> assmentSummaryStringList = new ArrayList<String>();
+    	ArrayList assmentArrayList = null;
+    	
+    	//check student is logged in
+    	if (loginHashMap.containsKey(studentid)) 
+    	{
+    		// add only uncompleted assessments to the list, 
+    		if (submittedAssessmentHashMap.containsKey(studentid)) 
+        	{
+    			//if student has submitted an assessment before check for it 
+        		assmentArrayList = submittedAssessmentHashMap.get(studentid);
+        		
+        		for(int i = 0; i < assmentArrayList.size(); i++)
+            	{
+        			Assessment assessment = (Assessment) assmentArrayList.get(i);
+        			
+        			String assessmentCode = assessment.getInformation();
+        			
+            		if (!assessmentCode.equals(DISTCOURSECODE)){
+            			//check assessment is not equal - meaning client had already taken out assessment and submitted
+            			assmentSummaryStringList.add(DISTCOURSECODE);
+            			
+            		}
+            		if (!assessmentCode.equals(COMMSCOURSECODE)){
+            			assmentSummaryStringList.add(COMMSCOURSECODE);
+            		}
+            	}
+        	}
+    		else{
+    			//student has yet to submit any assessment so just return full list
+    			assmentSummaryStringList = courseList;
+    		}
+    	}
+    	else{
+    		System.err.println("getAvailableSummary() - Student not listed as logged in studentid " + studentid);
+    	    throw new UnauthorizedAccess("getAvailableSummary() - No account credentials exist for: " + studentid);
+    	}    	
 
-        return null;
+        return assmentSummaryStringList;
     }
 
     // Return an Assessment object associated with a particular course code
@@ -115,29 +158,24 @@ public class ExamEngine implements ExamServer
     		throw new NoMatchingAssessment("No matching assessment for course code: " + courseCode);
     	}
     	
-    	ArrayList assmentArrayList = null;
+    	// get existing submitted assessments
+    	ArrayList assessmentArrayList = null;
     	
-    	if (assessmentHashMap.containsKey(studentid)) 
+    	if (submittedAssessmentHashMap.containsKey(studentid)) 
     	{
-    		// if student has submitted an assessment before, we want to make sure to add it to list correctly
-    		assmentArrayList = assessmentHashMap.get(studentid);
+    		// if student has already submitted an assessment before
+    		assessmentArrayList = submittedAssessmentHashMap.get(studentid);
     		System.out.println("getAssessment() assessment array List for " + studentid);
-    		
-    		if (assmentArrayList == null){
-    			System.out.println("assmentArrayList for " + studentid + " is null");
-    			
-    			assmentArrayList = new ArrayList<Assessment>();
-    			assmentArrayList.add(assessmentObj);
-    		}
     	} 
     	else
     	{
-    		// if student has never submitted an assessment before
-    		assmentArrayList = new ArrayList<Assessment>();
-			assmentArrayList.add(assessmentObj);
+    		// if student has never submitted an assessment before, put in an emtpy array list in submittedHashMap
+    		assessmentArrayList = new ArrayList<Assessment>();
+			//assmentArrayList.add(assessmentObj);
+    		submittedAssessmentHashMap.put(studentid, assessmentArrayList);
     	}
     	
-    	assessmentHashMap.put(studentid, assmentArrayList);
+    	submittedAssessmentHashMap.put(studentid, assessmentArrayList);
     	
         return assessmentObj;
     }
@@ -150,9 +188,9 @@ public class ExamEngine implements ExamServer
     	
     	ArrayList assmentArrayList = null;
 
-    	if (assessmentHashMap.containsKey(studentid)) 
+    	if (submittedAssessmentHashMap.containsKey(studentid)) 
     	{
-    		assmentArrayList = assessmentHashMap.get(studentid);
+    		assmentArrayList = submittedAssessmentHashMap.get(studentid);
     		System.out.println("get Assessment Array List for " + studentid);
     		
     		if (assmentArrayList == null){
@@ -170,6 +208,6 @@ public class ExamEngine implements ExamServer
     	
     	System.out.println("Inserting completed assessment: " + completed.getInformation());
     	
-    	assessmentHashMap.put(studentid, assmentArrayList);
+    	submittedAssessmentHashMap.put(studentid, assmentArrayList);
     }
 }
