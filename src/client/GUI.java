@@ -65,10 +65,14 @@ public class GUI extends JFrame implements Serializable {
 	private String[] answers1 = {"Yes", "No", "Maybe"};
 	private String[] answers2 = {"High", "Low", "Picolo"};
 	
+	private ClientDAO clientDAO;
+	
 	public GUI() {
 		
 		JFrame fr = new JFrame("RSI Assessment");
 		loginPage(fr);
+		
+		clientDAO = new ClientDAO();
 		
 	}
 	
@@ -307,7 +311,10 @@ public class GUI extends JFrame implements Serializable {
 				if(loginMo.isPressed()) {
 					System.out.println("login pressed");
 					
-					clientGUI newClient = new clientGUI();
+					//will need to retrieve text from boxes in GUI, hardcoded for now
+					
+					clientDAO.login(16316271, "fearghal");
+					
 					assessmentPage(frame);
 				}
 			}
