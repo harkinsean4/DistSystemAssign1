@@ -5,9 +5,12 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.Serializable;
 
 import javax.security.auth.spi.LoginModule;
+import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -18,8 +21,11 @@ import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 
 
@@ -38,9 +44,13 @@ public class GUI extends JFrame implements Serializable {
 	private JTextArea 	assessmentInfo, questionField;
     private JLabel 		dueDate, 		studentNumber, 	option1Text,
     					option2Text, 	option3Text, 	assignHeader;
-	private JButton 	submitAnswer;
+	private JButton 	submitAnswer, 	next;
 	private JRadioButton option1, 		option2, 		option3;
+	private ButtonGroup optionGroup;
 	private JList 		availableAssessments;
+	
+	private ButtonModel submitAnswerMo;
+	
 	private String[] assessments = {"CT414-1", "CT414-2", "EE444-1"};
 	
 	private int studentID = 12345678;
@@ -49,16 +59,17 @@ public class GUI extends JFrame implements Serializable {
 	private Font boldText = new Font("Arial", Font.BOLD, 18);
 	private Font regText = new Font("Arial", Font.PLAIN, 18);
 	
+	//--------------------------Test Strings----------------------------------//
+	private String[] questionsString = {"Can a duck swim", "How high can you jump", "Can a circle go in the square hole"};
+	
+	private String[] answers1 = {"Yes", "No", "Maybe"};
+	private String[] answers2 = {"High", "Low", "Picolo"};
+	
 	public GUI() {
 		
 		JFrame fr = new JFrame("RSI Assessment");
 		loginPage(fr);
 		
-//		System.out.println(loggable);
-//		
-//		while (loggable != true) {
-//			assessmentPage(fr);
-//		}
 	}
 	
 	public void assessmentPage(JFrame frame) {
@@ -102,6 +113,7 @@ public class GUI extends JFrame implements Serializable {
 		questionField = new JTextArea("The question will go here");
 		questionField.setFont(boldText);
 		questionField.setEditable(false);
+		questionField.setSize(800, 30);
 		c.gridx = 2;
 		c.gridy = 1;
 		//c.gridwidth = 4;
@@ -122,6 +134,18 @@ public class GUI extends JFrame implements Serializable {
 		c.gridy = 4;
 		questions.add(option3, c);
 		
+		optionGroup = new ButtonGroup();
+		optionGroup.add(option1);
+		optionGroup.add(option2);
+		optionGroup.add(option3);
+		
+		RadioButtonHandler rHandler = new RadioButtonHandler();
+		option1.addItemListener(rHandler);
+		option2.addItemListener(rHandler);
+		option3.addItemListener(rHandler);
+		
+		
+		
 		option1Text = new JLabel("Option 1");
 		option1Text.setFont(regText);
 		c.gridx = 2;
@@ -139,6 +163,13 @@ public class GUI extends JFrame implements Serializable {
 		c.gridx = 2;
 		c.gridy = 4;
 		questions.add(option3Text, c);
+		
+		next = new JButton("Next");
+		next.setFont(boldText);
+		c.gridx = 1;
+		c.gridy = 5;
+		//c.gridwidth = 3;
+		questions.add(next, c);
 		
 		submitAnswer = new JButton("Submit");
 		submitAnswer.setFont(boldText);
@@ -169,6 +200,42 @@ public class GUI extends JFrame implements Serializable {
 		d.gridy = 20;
 		sideView.add(availableAssessments,d);
 		
+		availableAssessments.setSelectionMode ( ListSelectionModel.SINGLE_SELECTION);
+		
+		availableAssessments.addListSelectionListener(
+		
+				new ListSelectionListener() {
+					@Override
+					public void valueChanged( ListSelectionEvent event ) 
+					{
+						if(availableAssessments.getSelectedIndex() == 0 ) {		
+							assessmentInfo.setText("This is Assignment 1: \nRMI Assignment for CT414");
+							dueDate.setText("17/02/2020 11:59.59");
+							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
+							option1Text.setText(answers1[availableAssessments.getSelectedIndex()]);
+							option2Text.setText(answers1[availableAssessments.getSelectedIndex() + 1]);
+							option3Text.setText(answers1[availableAssessments.getSelectedIndex() + 2]);
+						}
+						if(availableAssessments.getSelectedIndex() == 1 ) {
+							assessmentInfo.setText("This is Assignment 2: \nGUI Maker for CT414");
+							dueDate.setText("27/02/2020 11:59.59");
+							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
+							option1Text.setText(answers2[availableAssessments.getSelectedIndex()- 1 ]);
+							option2Text.setText(answers2[availableAssessments.getSelectedIndex()    ]);
+							option3Text.setText(answers2[availableAssessments.getSelectedIndex() + 1]);
+						}
+						if(availableAssessments.getSelectedIndex() == 2 ) {
+							assessmentInfo.setText("This is Assignment 3: \nSpeech Processing for EE444");
+							dueDate.setText("22/03/2020 11:59.59");
+							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
+							option1Text.setText(answers1[availableAssessments.getSelectedIndex() - 2]);
+							option2Text.setText(answers1[availableAssessments.getSelectedIndex() - 1]);
+							option3Text.setText(answers1[availableAssessments.getSelectedIndex()]);
+						}
+					}
+				}
+		);
+		
 		west = new JPanel(new BorderLayout());
 		west.add(sideView, BorderLayout.WEST);
 		
@@ -184,11 +251,6 @@ public class GUI extends JFrame implements Serializable {
 	    frame.setSize(900, 400);
 	    frame.setLocation(100, 100);
 	    frame.setVisible(true);
-		
-	}
-	
-	public void close(JFrame f) 
-	{
 		
 	}
 	
@@ -265,5 +327,27 @@ public class GUI extends JFrame implements Serializable {
 	public static void main(String[] args) {
 		GUI gui = new GUI();
 	}
+	
+	private class RadioButtonHandler implements ItemListener {
+
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+			if( e.getSource() == option1 ) 
+			{
+//				option2.
+			}
+			if (e.getSource() == option2 )
+			{
+	  
+			}
+			if (e.getSource() == option3 ) 
+			{
+				
+			}
+			
+		}
+	}
+	
+	
 }
 
