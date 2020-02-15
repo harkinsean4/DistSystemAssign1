@@ -7,12 +7,18 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ExamEngine implements ExamServer 
 {
 	private HashMap<Integer, String> loginHashMap = new HashMap<Integer, String>();
+	private HashMap<Integer, Boolean> isloggedinHashMap = new HashMap<Integer, Boolean>();
+	private HashMap<Integer, Boolean> loggedintimerHashMap = new HashMap<Integer, Boolean>();
+	private HashMap<Integer, Date> loggedinDateTimeHashMap = new HashMap<Integer, Date>();
 	private HashMap<Integer, ArrayList<Assessment>> submittedAssessmentHashMap = new HashMap<Integer, ArrayList<Assessment>>();
 	private static String DISTCOURSECODE = "CT414";
 	private static String COMMSCOURSECODE = "EE444";
@@ -29,7 +35,9 @@ public class ExamEngine implements ExamServer
         courseList.add(COMMSCOURSECODE);
         
         loginHashMap.put(16316271, "fearghal");
+        isloggedinHashMap.put(16316271, false);
     }
+    
     
     public static void main(String[] args) {
 		int registryport = 20345;
@@ -66,7 +74,7 @@ public class ExamEngine implements ExamServer
 
     // Implement the methods defined in the ExamServer interface...
     // Return an access token that allows access to the server for some time period
-    public int login(int studentid, String password) throws UnauthorizedAccess
+    public int login(final int studentid, String password) throws UnauthorizedAccess
     {	
     	String actualPassword = "";
     	
@@ -84,7 +92,35 @@ public class ExamEngine implements ExamServer
 	    {
 	    	System.out.println("Successful log in by student " + studentid);
 	    	
+	    	if(isloggedinHashMap.get(studentid) == false){
+	    		//check if student is already logged in
+	    		isloggedinHashMap.put(studentid, true);
+	    	}
+	    	else{
+	    		throw new UnauthorizedAccess(studentid + " already logged in!");
+	    	}
+	    	
 	    	ACCESSTOKEN = ACCESSTOKEN +1; //increment access token for so next student who logs in gets different one
+	    	
+	    	//start the activation time for this timer
+	    	loggedintimerHashMap.put(ACCESSTOKEN, true);
+	    	loggedinDateTimeHashMap.put(studentid, new Date());
+	    	
+	    	Timer timer = new Timer();
+	    	timer.scheduleAtFixedRate(new TimerTask() {
+	    		  @Override
+	    		  public void run() 
+	    		  {
+	    			  Date now = new Date();
+	    			  // display time and date using toString()
+	    			  System.out.println(now.toString());
+	    			  
+	    			  if (now.getTime() - loggedinDateTimeHashMap.get(studentid).getTime() >= 20*60*1000)
+	    			  
+	    			  loggedintimerHashMap.put(ACCESSTOKEN, false);
+	    		  }
+	    		}, 2*60*1000, 2*60*1000); // 1000 milliseconds = 1 second x 60 = 60 seconds x 2 = 2 minutes
+	    	
 	    	return ACCESSTOKEN;
 	    }
 	    else
