@@ -1,5 +1,6 @@
 package client;
 
+import java.io.File;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -26,10 +27,20 @@ public class ClientDAO
 
         System.out.println("RMIRegistry port = " + registryport);
         
-        System.setProperty("java.rmi.server.hostname","localhost");
-        System.setProperty("java.security.policy","file:/mnt/c/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/client.policy");
-        System.setProperty("java.rmi.server.codebase","file:/mnt/c/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
-
+        if(System.getProperty("java.class.path").contains("harki"))
+        {
+        	System.out.print("Sean");
+        	System.setProperty("java.rmi.server.hostname","127.0.0.1");
+        	System.setProperty("java.security.policy","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/client.policy");
+        	System.setProperty("java.rmi.server.codebase","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
+        }
+        else{
+        	System.out.print("Darragh");
+        	System.setProperty("java.rmi.server.hostname","127.0.0.1");
+        	System.setProperty("java.security.policy","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/client.policy");
+        	System.setProperty("java.rmi.server.codebase","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
+        }
+        
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }

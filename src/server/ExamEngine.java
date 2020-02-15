@@ -38,6 +38,10 @@ public class ExamEngine implements ExamServer
            registryport = Integer.parseInt(args[0]);
         
         System.out.println("RMIRegistry port = " + registryport);
+        
+        //System.setProperty("java.rmi.server.hostname","127.0.1.1;");
+        //System.setProperty("java.security.policy","file:c:Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/server.policy");
+        //System.setProperty("java.rmi.server.codebase","file:/mnt/c/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
 		
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
@@ -52,9 +56,7 @@ public class ExamEngine implements ExamServer
                 (ExamServer) UnicastRemoteObject.exportObject(engine, 0);
             
             Registry registry = LocateRegistry.getRegistry(registryport);
-			//System.setProperty("java.rmi.server.hostname","127.0.1.1;");
-            //System.setProperty("java.security.policy","file:/mnt/c/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/server.policy");
-            registry.rebind(name, stub);
+			registry.rebind(name, stub);
             System.out.println("ExamEngine bound");
         } catch (Exception e) {
             System.err.println("ExamEngine exception:");
