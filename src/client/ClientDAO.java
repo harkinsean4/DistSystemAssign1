@@ -27,7 +27,7 @@ public class ClientDAO
         System.out.println("RMIRegistry port = " + registryport);
         
         System.setProperty("java.rmi.server.hostname","localhost");
-        System.setProperty("java.security.policy","file:/mnt/c/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/server.policy");
+        System.setProperty("java.security.policy","file:/mnt/c/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/client.policy");
         System.setProperty("java.rmi.server.codebase","file:/mnt/c/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
 
         if (System.getSecurityManager() == null) {
