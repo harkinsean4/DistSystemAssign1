@@ -80,7 +80,7 @@ public class ExamEngine implements ExamServer
     	
     	if (loginHashMap.containsKey(studentid)) 
     	{
-    		// is hashmap contains student id as key 
+    		// if hashmap contains student id as key 
     		actualPassword = loginHashMap.get(studentid);
     	} 
     	else 
@@ -90,6 +90,7 @@ public class ExamEngine implements ExamServer
 	    
     	if(actualPassword.equals(password))
 	    {
+    		// check is submitted password matches actualPassword
 	    	System.out.println("Successful log in by student " + studentid);
 	    	
 	    	if(isloggedinHashMap.get(studentid) == false){
@@ -116,8 +117,15 @@ public class ExamEngine implements ExamServer
 	    			  System.out.println(now.toString());
 	    			  
 	    			  if (now.getTime() - loggedinDateTimeHashMap.get(studentid).getTime() >= 20*60*1000)
-	    			  
-	    			  loggedintimerHashMap.put(ACCESSTOKEN, false);
+	    			  {
+	    				  // if last action was greater than 2 minutes then timeout
+	    				  loggedintimerHashMap.put(ACCESSTOKEN, false);
+	    			  }
+	    			  else{
+	    				  // else user is still active
+	    				  loggedintimerHashMap.put(ACCESSTOKEN, true);
+	    			  }
+	    				  
 	    		  }
 	    		}, 2*60*1000, 2*60*1000); // 1000 milliseconds = 1 second x 60 = 60 seconds x 2 = 2 minutes
 	    	
@@ -125,7 +133,8 @@ public class ExamEngine implements ExamServer
 	    }
 	    else
 	    {
-	    	System.err.println("Login from " + studentid);	
+	    	System.err.println("Login Error from " + studentid);
+	    	System.err.println(""+ password + " - does not equal - " + actualPassword);
 	    	throw new UnauthorizedAccess("incorrect password for: " + studentid + ". Please try again");
 	    }
     }
@@ -138,9 +147,12 @@ public class ExamEngine implements ExamServer
     	List<String> assmentSummaryStringList = new ArrayList<String>();
     	ArrayList assmentArrayList = null;
     	
-    	//check student is logged in
-    	if (loginHashMap.containsKey(studentid)) 
+    	// check student has valid access token
+    	if (loggedintimerHashMap.get(token) == true) 
     	{
+    		//if access token still valid, update the time since last method call
+    		loggedinDateTimeHashMap.put(studentid, new Date());
+    		
     		// add only uncompleted assessments to the list, 
     		if (submittedAssessmentHashMap.containsKey(studentid)) 
         	{
@@ -169,9 +181,9 @@ public class ExamEngine implements ExamServer
     		}
     	}
     	else{
-    		System.err.println("getAvailableSummary() - Student not listed as logged in studentid " + studentid);
-    	    throw new UnauthorizedAccess("getAvailableSummary() - No account credentials exist for: " + studentid);
-    	}    	
+			throw new UnauthorizedAccess("Access token has timed out");
+		}
+    	  	
 
         return assmentSummaryStringList;
     }
@@ -182,38 +194,53 @@ public class ExamEngine implements ExamServer
     	
     	Assessment assessmentObj = null;
     	
-    	if (courseCode.equals(DISTCOURSECODE))
+    	// check student has valid access token
+    	if (loggedintimerHashMap.get(token) == true) 
     	{
-    		System.out.println("getAssessment() for: " + courseCode);
-    		assessmentObj = new DistAssessment(studentid);
-    	}
-    	else if (courseCode.equals(COMMSCOURSECODE))
-    	{
-    		System.out.println("getAssessment() for: " + courseCode);
-    		assessmentObj = new CommsAssessment(studentid);
+    		//if access token still valid, update the time since last method call
+    		loggedinDateTimeHashMap.put(studentid, new Date());
+    	
+    		//get the assessment object according to requested course code
+	    	if (courseCode.equals(DISTCOURSECODE))
+	    	{
+	    		System.out.println("getAssessment() for: " + courseCode);
+	    		assessmentObj = new DistAssessment(studentid);
+	    	}
+	    	else if (courseCode.equals(COMMSCOURSECODE))
+	    	{
+	    		System.out.println("getAssessment() for: " + courseCode);
+	    		assessmentObj = new CommsAssessment(studentid);
+	    	}
+	    	else{
+	    		throw new NoMatchingAssessment("No matching assessment for course code: " + courseCode);
+	    	}
+    	
+			// next lines of code check is student has submitted an assessment before,
+	    	// because we must keep track of what assessments students has done beofre 
+	    	// tell us what existing assessments to be submitted 
+			ArrayList assessmentArrayList = null;
+			
+			if (submittedAssessmentHashMap.containsKey(studentid)) 
+			{
+				// check if Hashmap for submitted assessment has student id key 
+				// - telling us if student has submitted an assessment before
+				assessmentArrayList = submittedAssessmentHashMap.get(studentid);
+				System.out.println(studentid + ", this student has submitted an assessment before");
+			} 
+			else
+			{
+				// if student has never submitted an assessment before, put in an empty array list in submittedHashMap
+				assessmentArrayList = new ArrayList<Assessment>();
+				//assmentArrayList.add(assessmentObj);
+				submittedAssessmentHashMap.put(studentid, assessmentArrayList);
+				System.out.println(studentid + ", this student has never submitted an assessment before");
+			}
+			
+			submittedAssessmentHashMap.put(studentid, assessmentArrayList);
     	}
     	else{
-    		throw new NoMatchingAssessment("No matching assessment for course code: " + courseCode);
-    	}
-    	
-    	// get existing submitted assessments
-    	ArrayList assessmentArrayList = null;
-    	
-    	if (submittedAssessmentHashMap.containsKey(studentid)) 
-    	{
-    		// if student has already submitted an assessment before
-    		assessmentArrayList = submittedAssessmentHashMap.get(studentid);
-    		System.out.println("getAssessment() assessment array List for " + studentid);
-    	} 
-    	else
-    	{
-    		// if student has never submitted an assessment before, put in an emtpy array list in submittedHashMap
-    		assessmentArrayList = new ArrayList<Assessment>();
-			//assmentArrayList.add(assessmentObj);
-    		submittedAssessmentHashMap.put(studentid, assessmentArrayList);
-    	}
-    	
-    	submittedAssessmentHashMap.put(studentid, assessmentArrayList);
+			throw new UnauthorizedAccess("Access token has timed out");
+		}
     	
         return assessmentObj;
     }
@@ -224,28 +251,40 @@ public class ExamEngine implements ExamServer
                 {
     	System.out.println("submitAssessment() for: " + studentid);
     	
-    	ArrayList assmentArrayList = null;
-
-    	if (submittedAssessmentHashMap.containsKey(studentid)) 
+    	// check student has valid access token
+    	if (loggedintimerHashMap.get(token) == true) 
     	{
-    		assmentArrayList = submittedAssessmentHashMap.get(studentid);
-    		System.out.println("get Assessment Array List for " + studentid);
-    		
-    		if (assmentArrayList == null){
-    			System.out.println("assmentArrayList for " + studentid + " is null");
-    			assmentArrayList = new ArrayList<Assessment>();
-    		}
-    	} 
-    	else 
-    	{
-    		System.err.println("assessmentHashMap does not have a key for studentid " + studentid);
-    	    throw new UnauthorizedAccess("No account credentials exist for: " + studentid + "Make sure student ID is correct and try again");
+    		//if access token still valid, update the time since last method call
+    		loggedinDateTimeHashMap.put(studentid, new Date());
+    	
+			ArrayList<Assessment> assmentArrayList = null;
+		
+			if (submittedAssessmentHashMap.containsKey(studentid)) 
+			{
+				// check if Hashmap for submitted assessments already contains entries for this student
+				// it should contain an emtpy assmesnt list (student id)- value (assessment array lsit)
+				// created in the getAssessment() method
+				assmentArrayList = submittedAssessmentHashMap.get(studentid);
+				System.out.println("get Assessment Array List for " + studentid);
+				
+				if (assmentArrayList == null){
+					System.out.println("assmentArrayList for " + studentid + " is null");
+					assmentArrayList = new ArrayList<Assessment>();
+				}
+			} 
+			else 
+			{
+				System.err.println("could not find entry in submittedAssessmentHashMap for studentid key:" + studentid);
+			}
+			
+			assmentArrayList.add(completed);
+			
+			System.out.println("Inserting completed assessment: " + completed.getInformation());
+			
+			submittedAssessmentHashMap.put(studentid, assmentArrayList);
     	}
-    	
-    	assmentArrayList.add(completed);
-    	
-    	System.out.println("Inserting completed assessment: " + completed.getInformation());
-    	
-    	submittedAssessmentHashMap.put(studentid, assmentArrayList);
+		else{
+			throw new UnauthorizedAccess("Access token has timed out");
+		}
     }
 }
