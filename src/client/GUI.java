@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.Serializable;
@@ -72,6 +74,7 @@ public class GUI extends JFrame implements Serializable {
 		
 		JFrame fr = new JFrame("RSI Assessment");
 		loginPage(fr);
+		
 		
 		clientDAO = new ClientDAO();
 		
@@ -305,19 +308,20 @@ public class GUI extends JFrame implements Serializable {
 	    
 	    loginMo = login.getModel();
 	    
-	    loginMo.addChangeListener(new ChangeListener(){
+	    loginMo.addActionListener(new ActionListener(){
 
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				if(loginMo.isPressed()) {
+			public void actionPerformed(ActionEvent e) {
+				if(e.getSource() == loginMo) {
 					System.out.println("login pressed");
 					
 					//will need to retrieve text from boxes in GUI, hardcoded for now
 					
-					clientDAO.login(16316271, "fearghal");
+					clientDAO.login(Integer.parseInt(userInput.getText()), passInput.getSelectedText());
 					
 					assessmentPage(frame);
 				}
+				
 			}
 	    });
 	    
@@ -355,7 +359,5 @@ public class GUI extends JFrame implements Serializable {
 			
 		}
 	}
-	
-	
 }
 
