@@ -37,8 +37,8 @@ public class ClientDAO
         else{
         	System.out.print("Darragh");
         	System.setProperty("java.rmi.server.hostname","127.0.0.1");
-        	System.setProperty("java.security.policy","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/client.policy");
-        	System.setProperty("java.rmi.server.codebase","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
+        	System.setProperty("java.security.policy","file:/c:/Users/Darragh/eclipse-workspace/DistSystemAssign1/src/client.policy");
+        	System.setProperty("java.rmi.server.codebase","file:/c:/Users/Darragh/eclipse-workspace/DistSystemAssign1/src/");
         }
         
         if (System.getSecurityManager() == null) {
@@ -59,7 +59,7 @@ public class ClientDAO
 	public int login(int studentid, String password)
 	{
 		try {
-			accessToken = examServer.login(16316271, "fearghal");
+			accessToken = examServer.login(studentid, password);
 			
 			if (accessToken != 0){
 	        	System.out.println("Successful login, access token for client is: " + accessToken);
