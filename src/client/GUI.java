@@ -93,8 +93,8 @@ public class GUI extends JFrame implements Serializable {
 		
 		frame.remove(loginPage);
 		
-		Assessment dist = new DistAssessment(studentID);
-		CommsAssessment coms = new CommsAssessment(studentID);
+		Assessment dist = new DistAssessment(studentID, 1);
+		CommsAssessment coms = new CommsAssessment(studentID, 2);
 		
 		assessmentNames = new ArrayList<String>();
 		assessments = new ArrayList<Assessment>();
