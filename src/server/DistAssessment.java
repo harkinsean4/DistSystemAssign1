@@ -54,14 +54,39 @@ public class DistAssessment implements Assessment
 
 	public Question getQuestion(int questionNumber) throws InvalidQuestionNumber 
 	{
-		return questionList.get(questionNumber);
+		Question question = null;
+		
+		if(questionNumber <= questionList.size())
+		{
+			//if questionNumber request is greater than size of question lidt 
+			question = questionList.get(questionNumber);
+		}
+		else 
+		{
+			throw new InvalidQuestionNumber(); 
+		}
+		
+		return question;
 	}
 
 	// Answer a particular question
 	public void selectAnswer(int questionNumber, int optionNumber)
 			throws InvalidQuestionNumber, InvalidOptionNumber 
 	{
-		answerMap.put(questionList.get(questionNumber), optionNumber);
+		if(questionNumber <= questionList.size())
+		{
+			//if questionNumber request is greater than size of question list
+			if(optionNumber <= questionList.size()){
+				answerMap.put(questionList.get(questionNumber), optionNumber);
+			}
+			else{
+				throw new InvalidQuestionNumber(); 
+			}
+		}
+		else 
+		{
+			throw new InvalidQuestionNumber(); 
+		}
 	}
 
 	// Return selected answer or zero if none selected yet

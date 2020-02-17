@@ -1,3 +1,9 @@
+/*
+ * ClientDAO acts as intermediate between the client and server so the code can be decoupled
+ * It's role is to look up the RMI registry for the exam engine remote object and invoke it's remote method
+ * It also catches and handles all exceptions
+ * */
+
 package client;
 
 import java.io.File;
@@ -16,9 +22,7 @@ public class ClientDAO
 {
 	private int studentid;
 	private String password;
-	
 	private static ExamServer examServer = null;
-	private static ArrayList<Assessment> clientAssessmentList = new ArrayList<Assessment>();
 	
 	public ClientDAO()
 	{		
@@ -28,13 +32,13 @@ public class ClientDAO
         
         if(System.getProperty("java.class.path").contains("harki"))
         {
-        	System.out.print("Sean");
+        	//System.out.print("Sean");
         	System.setProperty("java.rmi.server.hostname","127.0.0.1");
         	System.setProperty("java.security.policy","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/client.policy");
         	System.setProperty("java.rmi.server.codebase","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
         }
         else{
-        	System.out.print("Darragh");
+        	//System.out.print("Darragh");
         	System.setProperty("java.rmi.server.hostname","127.0.0.1");
         	System.setProperty("java.security.policy","file:/c:/Users/Darragh/eclipse-workspace/DistSystemAssign1/src/client.policy");
         	System.setProperty("java.rmi.server.codebase","file:/c:/Users/Darragh/eclipse-workspace/DistSystemAssign1/src/");
@@ -63,18 +67,18 @@ public class ClientDAO
 			accessToken = examServer.login(studentid, password);
 			
 			if (accessToken != 0){
-	        	System.out.println("Successful login, access token for client is: " + accessToken);
+	        	System.out.println("ClientDAO - Successful login, access token for client is: " + accessToken);
 	        }
 	        else{
-	        	System.err.println("Unsuccessful login");
+	        	System.err.println("ClientDAO - Unsuccessful login");
 	        }  
 			
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("RemoteException - Unsuccessful login "+ e.getMessage());
+			//e.printStackTrace();
 		} catch (UnauthorizedAccess e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("UnauthorizedAccess - Unsuccessful login "+ e.getMessage());
+			//e.printStackTrace();
 		}
 		
 		return accessToken;
@@ -101,20 +105,19 @@ public class ClientDAO
 					return availableAssessments;
 				}
 				else{
-					System.out.println("No available assessments");
+					System.out.println("ClientDAO - No available assessments");
 				}
 			}
 			
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("RemoteException - Unsuccessful login " + e.getMessage());
+			//e.printStackTrace();
 		} catch (UnauthorizedAccess e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("UnauthorizedAccess - Unable to getAvailableSummary " +e.getMessage());
+			//e.printStackTrace();
 		} catch (NoMatchingAssessment e) {
-			// TODO Auto-generated catch block
-			System.err.println("Assessment for that course code does not exist");
-			e.printStackTrace();
+			System.err.println("NoMatchingAssessment - Unable to getAvailableSummary " + e.getMessage());
+			//e.printStackTrace();
 		}
 		return null;
 		
@@ -128,20 +131,17 @@ public class ClientDAO
 		try {
 			assessment = examServer.getAssessment(token, studentid, courseCode);
 			
-			clientAssessmentList.add(assessment);
-			
-			System.out.println(assessment.getInformation());
+			System.out.println("ClientDAO - " + assessment.getInformation());
 			
 		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("RemoteException -  Unable to getAssessment() " + e.getMessage());
+			//e.printStackTrace();
 		} catch (UnauthorizedAccess e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("UnauthorizedAccess -  Unable to getAssessment() " + e.getMessage());
+			//e.printStackTrace();
 		} catch (NoMatchingAssessment e) {
-			// TODO Auto-generated catch block
-			System.err.println("Assesment for that course code does not exist");
-			e.printStackTrace();
+			System.err.println("NoMatchingAssessment -  Unable to getAssessment() " + e.getMessage());
+			//e.printStackTrace();
 		}
 		return assessment;
 		
@@ -152,21 +152,18 @@ public class ClientDAO
 	{
 		
 		try {	
-			System.out.println("submitAssessment() - " + completed.getInformation());
 			examServer.submitAssessment(token, studentid, completed);
-			clientAssessmentList.remove(completed); //remove assignment from list
-			System.out.println("submitAssessment() - assessment now removed from ClientDAO");
+			System.out.println("ClientDAO - submitAssessment() - " + completed.getInformation());
 		} 
 		catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("RemoteException -  Unable to submitAssessment() " + e.getMessage());
+			//e.printStackTrace();
 		} catch (UnauthorizedAccess e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("UnauthorizedAccess -  Unable to submitAssessment() " + e.getMessage());
+			//e.printStackTrace();
 		} catch (NoMatchingAssessment e) {
-			// TODO Auto-generated catch block
-			System.err.println("Assesment for that course code does not exist");
-			e.printStackTrace();
+			System.err.println("NoMatchingAssessment -  Unable to submitAssessment() " + e.getMessage());
+			//e.printStackTrace();
 		}
 	}
 }
