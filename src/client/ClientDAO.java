@@ -95,7 +95,7 @@ public class ClientDAO
 				{
 					for (int i = 0; i < availableAssessments.size(); i++)
 					{
-						System.out.println(availableAssessments.get(i));
+						System.out.println("ClientDAO: "+ availableAssessments.get(i));
 					}
 					
 					return availableAssessments;
