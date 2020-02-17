@@ -244,12 +244,15 @@ public class GUI extends JFrame implements Serializable {
 				if(selectedAns != -1) {
 					try {
 						assessments.get(ptr).selectAnswer(qPtr, selectedAns);
+						System.out.println("GUI: selected answers added");
 					} catch (InvalidQuestionNumber | InvalidOptionNumber e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				
+					
 					qPtr++;
+					System.out.println("GUI: question pointer: " + qPtr);
 					nextQuestion(qPtr);
 					availableAssessments.setEnabled(false);
 					optionGroup.clearSelection();
@@ -349,11 +352,12 @@ public class GUI extends JFrame implements Serializable {
 						// and date is updated
 						ptr = availableAssessments.getSelectedIndex();
 						dueDate.setText(due.toString());
-						if(ptr != -1)
+						if(ptr != -1) {
 							due = assessments.get(ptr).getClosingDate();
-						qPtr = 0;
-						
-						nextQuestion(qPtr);
+							qPtr = 0;
+							System.out.println("GUI: Assessment Pointer: " + ptr);
+							nextQuestion(qPtr);
+						}
 					}
 				}
 		);
@@ -489,7 +493,7 @@ public class GUI extends JFrame implements Serializable {
 		qs = assessments.get(ptr).getQuestions();
 		as = qs.get(q).getAnswerOptions();
 		selectedAns = -1;
-
+		
 		assessmentInfo.setText(assessmentNames.get(ptr));
 			
 		questionField.setText(qs.get(q).getQuestionDetail());
@@ -506,14 +510,17 @@ public class GUI extends JFrame implements Serializable {
 			if( e.getSource() == option1 ) 
 			{
 				selectedAns = 0;
+				System.out.println("GUI: Selected answer: 0");
 			}
 			if (e.getSource() == option2 )
 			{
 				selectedAns = 1;
+				System.out.println("GUI: Selected answer: 1");
 			}
 			if (e.getSource() == option3 ) 
 			{
 				selectedAns = 2;
+				System.out.println("GUI: Selected answer: 2");
 			}
 		}
 	}
