@@ -20,8 +20,12 @@ public class DistAssessment implements Assessment
 	public DistAssessment(int studentID)
 	{
 		this.studentID = studentID;
-		questionList.add(new Question1());
-		questionList.add(new Question2());
+		
+		String[] answers1 = {"Yeah fackin nah", "Nah fackin yeah", "Course Dude"};
+		questionList.add(new QuestionDist(1, "Could you skate down a quarter pipe?", answers1));
+		
+		String[] answers2 = {"Goblin", "Fairy", "Snookum"};
+		questionList.add(new QuestionDist(2, "Michael D _______ Higgins", answers2));
 	}
 
 	public String getInformation() {
