@@ -113,18 +113,19 @@ public class ExamEngine implements ExamServer
 	    		  public void run() 
 	    		  {
 	    			  Date now = new Date();
+	    			  Date logintime = loggedinDateTimeHashMap.get(studentid);
 	    			  // display time and date using toString()
-	    			  System.out.println(now.toString());
+	    			  System.out.println(now.toString() + "is " + (now.getTime() - logintime.getTime()) + " greater than " + logintime.toString());
 	    			  
-	    			  if (now.getTime() - loggedinDateTimeHashMap.get(studentid).getTime() >= 20*60*1000)
+	    			  if (now.getTime() - loggedinDateTimeHashMap.get(studentid).getTime() >= 2*60*1000)
 	    			  {
 	    				  // if last action was greater than 2 minutes then timeout
-	    				  System.out.println("" + studentid + "login has timeout");
+	    				  System.out.println("" + studentid + " login has timed out");
 	    				  loggedintimerHashMap.put(ACCESSTOKEN, false);
 	    			  }
 	    			  else{
 	    				  // else user is still active
-	    				  System.out.println("" + studentid + "is still active");
+	    				  System.out.println("" + studentid + " is still active");
 	    				  loggedintimerHashMap.put(ACCESSTOKEN, true);
 	    			  }
 	    				  
