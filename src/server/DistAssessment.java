@@ -12,14 +12,16 @@ import java.util.List;
 public class DistAssessment implements Assessment 
 {
 	private static String ASSESSMENTNAME = "CT414";
+	private int assessmentNumber;
 	private int studentID = 0;
 	private Date closingDate = null;
 	private ArrayList<Question> questionList = new ArrayList<Question>();
 	private HashMap<Question, Integer> answerMap = new HashMap<Question, Integer>();
 	
-	public DistAssessment(int studentID)
+	public DistAssessment(int studentID, int assessmentNumber)
 	{
 		this.studentID = studentID;
+		this.assessmentNumber = assessmentNumber;
 		
 		String[] answers1 = {"Yeah fackin nah", "Nah fackin yeah", "Course Dude"};
 		questionList.add(new QuestionDist(1, "Could you skate down a quarter pipe?", answers1));

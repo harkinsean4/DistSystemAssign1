@@ -51,7 +51,7 @@ public class ExamEngine implements ExamServer
         
         //System.setProperty("java.rmi.server.hostname","127.0.1.1;");
         //System.setProperty("java.security.policy","file:c:Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/server.policy");
-        //System.setProperty("java.rmi.server.codebase","file:/mnt/c/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
+        //System.setProperty("java.rmi.server.codebase","file:c:Users//harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
 		
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
@@ -150,7 +150,7 @@ public class ExamEngine implements ExamServer
                 UnauthorizedAccess, NoMatchingAssessment, RemoteException 
     {
     	List<String> assmentSummaryStringList = new ArrayList<String>();
-    	ArrayList assmentArrayList = null;
+    	ArrayList submittedAssmentArrayList = null;
     	
     	// check student has valid access token
     	if (loggedintimerHashMap.get(token) == true) 
@@ -158,24 +158,25 @@ public class ExamEngine implements ExamServer
     		//if access token still valid, update the time since last method call
     		loggedinDateTimeHashMap.put(studentid, new Date());
     		
-    		// add only uncompleted assessments to the list, 
+    		// add only uncompleted assessments to the available list, 
     		if (submittedAssessmentHashMap.containsKey(studentid)) 
         	{
     			//if student has submitted an assessment before check for it 
-        		assmentArrayList = submittedAssessmentHashMap.get(studentid);
+    			submittedAssmentArrayList = submittedAssessmentHashMap.get(studentid);
         		
-        		for(int i = 0; i < assmentArrayList.size(); i++)
+        		for(int i = 0; i < submittedAssmentArrayList.size(); i++)
             	{
-        			Assessment assessment = (Assessment) assmentArrayList.get(i);
+        			//loop through to get submitted assessments
+        			Assessment assessment = (Assessment) submittedAssmentArrayList.get(i);
         			
         			String assessmentCode = assessment.getInformation();
         			
-            		if (!assessmentCode.equals(DISTCOURSECODE)){
-            			//check assessment is not equal - meaning client had already taken out assessment and submitted
+            		if (!assessmentCode.contains(DISTCOURSECODE)){
+            			//check assessment code from submitted assessment list is not equal - meaning client has already taken out assessment and submitted
             			assmentSummaryStringList.add(DISTCOURSECODE);
             			
             		}
-            		if (!assessmentCode.equals(COMMSCOURSECODE)){
+            		if (!assessmentCode.contains(COMMSCOURSECODE)){
             			assmentSummaryStringList.add(COMMSCOURSECODE);
             		}
             	}
@@ -189,7 +190,6 @@ public class ExamEngine implements ExamServer
 			throw new UnauthorizedAccess("Access token has timed out");
 		}
     	  	
-
         return assmentSummaryStringList;
     }
 
@@ -204,44 +204,63 @@ public class ExamEngine implements ExamServer
     	{
     		//if access token still valid, update the time since last method call
     		loggedinDateTimeHashMap.put(studentid, new Date());
-    	
-    		//get the assessment object according to requested course code
-	    	if (courseCode.equals(DISTCOURSECODE))
-	    	{
-	    		System.out.println("getAssessment() for: " + courseCode);
-	    		assessmentObj = new DistAssessment(studentid);
-	    	}
-	    	else if (courseCode.equals(COMMSCOURSECODE))
-	    	{
-	    		System.out.println("getAssessment() for: " + courseCode);
-	    		assessmentObj = new CommsAssessment(studentid);
-	    	}
-	    	else{
-	    		throw new NoMatchingAssessment("No matching assessment for course code: " + courseCode);
-	    	}
-    	
-			// next lines of code check is student has submitted an assessment before,
-	    	// because we must keep track of what assessments students has done beofre 
-	    	// tell us what existing assessments to be submitted 
-			ArrayList assessmentArrayList = null;
-			
+    		
+    		ArrayList<Assessment> submittedAssessmentArrayList = null;
+    		
 			if (submittedAssessmentHashMap.containsKey(studentid)) 
 			{
-				// check if Hashmap for submitted assessment has student id key 
-				// - telling us if student has submitted an assessment before
-				assessmentArrayList = submittedAssessmentHashMap.get(studentid);
-				System.out.println(studentid + ", this student has submitted an assessment before");
+				// check if Hashmap for submitted assessments already contains submitted assessment for this student
+				// students can't request an assessment they have already submitted
+				
+				submittedAssessmentArrayList = submittedAssessmentHashMap.get(studentid);
+				System.out.println("get submitted Assessment Array List for " + studentid);
+				
+				if (submittedAssessmentArrayList == null){
+					System.out.println("assmentArrayList for " + studentid + " is null");
+					submittedAssessmentArrayList = new ArrayList<Assessment>();
+				}
+				else
+				{
+					for(int i = 0; i < submittedAssessmentArrayList.size(); i++)
+	            	{
+	        			//loop through to get submitted assessments
+	        			Assessment assessment = (Assessment) submittedAssessmentArrayList.get(i);
+	        			String assessmentCode = assessment.getInformation();
+	        			
+	            		if (courseCode.contains(DISTCOURSECODE)){
+	            			throw new NoMatchingAssessment("You have already completed this assessment! - " + DISTCOURSECODE);
+	            		}
+	            		else if (courseCode.contains(COMMSCOURSECODE)){
+	            			throw new NoMatchingAssessment("You have already completed this assessment!- " + COMMSCOURSECODE);
+	            		}
+	            	}
+					// close for loop looping through submitted assessments
+				}
 			} 
 			else
 			{
+			// else student has never submitted an assessment before
+	
 				// if student has never submitted an assessment before, put in an empty array list in submittedHashMap
-				assessmentArrayList = new ArrayList<Assessment>();
-				//assmentArrayList.add(assessmentObj);
-				submittedAssessmentHashMap.put(studentid, assessmentArrayList);
-				System.out.println(studentid + ", this student has never submitted an assessment before");
+				System.out.println("getAssessment() - " +studentid + ", this student has never submitted an assessment before");
+				ArrayList<Assessment> newSubmittedAssessmentArrayList = new ArrayList<Assessment>();
+				submittedAssessmentHashMap.put(studentid, newSubmittedAssessmentArrayList);
+				
+	    		//get the assessment object according to requested course code
+		    	if (courseCode.equals(DISTCOURSECODE))
+		    	{
+		    		System.out.println("getAssessment() for: " + courseCode);
+		    		assessmentObj = new DistAssessment(studentid, 1);
+		    	}
+		    	else if (courseCode.equals(COMMSCOURSECODE))
+		    	{
+		    		System.out.println("getAssessment() for: " + courseCode);
+		    		assessmentObj = new CommsAssessment(studentid, 2);
+		    	}
+		    	else{
+		    		throw new NoMatchingAssessment("No matching assessment for course code: " + courseCode);
+		    	}
 			}
-			
-			submittedAssessmentHashMap.put(studentid, assessmentArrayList);
     	}
     	else{
 			throw new UnauthorizedAccess("Access token has timed out");
@@ -261,7 +280,6 @@ public class ExamEngine implements ExamServer
     	{
     		//if access token still valid, update the time since last method call
     		loggedinDateTimeHashMap.put(studentid, new Date());
-    	
 			ArrayList<Assessment> submittedAssessmentArrayList = null;
 		
 			if (submittedAssessmentHashMap.containsKey(studentid)) 

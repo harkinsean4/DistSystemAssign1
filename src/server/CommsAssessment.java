@@ -12,14 +12,16 @@ import java.util.List;
 public class CommsAssessment implements Assessment 
 {
 	private static String ASSESSMENTNAME = "EE444";
+	private int assessmentNumber;
 	private int studentID = 0;
 	private Date closingDate = null;
 	private ArrayList<Question> questionList = new ArrayList<Question>();
 	private HashMap<Question, Integer> answerMap = new HashMap<Question, Integer>();
 	
-	public CommsAssessment(int studentID)
+	public CommsAssessment(int studentID, int assessmentNumber)
 	{
 		this.studentID = studentID;
+		this.assessmentNumber = assessmentNumber;
 		
 		String[] answers1 = {"Bring Shovel", "Don't forget it!", "Leave shovel at home"};
 		questionList.add(new QuestionComms(1, "Don't forget to bring your shovel to work", answers1));
@@ -29,7 +31,7 @@ public class CommsAssessment implements Assessment
 	}
 
 	public String getInformation() {
-		String information = ASSESSMENTNAME;
+		String information = "Assessment " + Integer.toString(assessmentNumber) + ". " + ASSESSMENTNAME;
 		
 		return information;
 	}
