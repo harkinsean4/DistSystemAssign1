@@ -18,7 +18,6 @@ public class ClientDAO
 	private String password;
 	
 	private static ExamServer examServer = null;
-	private static int accessToken;
 	private static ArrayList<Assessment> clientAssessmentList = new ArrayList<Assessment>();
 	
 	public ClientDAO()
@@ -58,6 +57,8 @@ public class ClientDAO
 	// Return an access token that allows access to the server for some time period
 	public int login(int studentid, String password)
 	{
+		int accessToken = 0;
+		
 		try {
 			accessToken = examServer.login(studentid, password);
 			
@@ -65,7 +66,7 @@ public class ClientDAO
 	        	System.out.println("Successful login, access token for client is: " + accessToken);
 	        }
 	        else{
-	        	System.err.println("unsuccessful login");
+	        	System.err.println("Unsuccessful login");
 	        }  
 			
 		} catch (RemoteException e) {
@@ -82,9 +83,11 @@ public class ClientDAO
 	// Return a summary list of Assessments currently available for this studentid
 	public List<String> getAvailableSummary(int token, int studentid)
 	{
+		List<String> availableAssessments = null;
+		
 		try {			
-			System.out.println("Get Available Summary of Assessments ");
-			List<String> availableAssessments = examServer.getAvailableSummary(accessToken, 16316271);
+			System.out.println("getAvailableSummary() - Get Available Summary of Assessments ");
+			availableAssessments = examServer.getAvailableSummary(token, studentid);
 			
 			if (availableAssessments != null)
 			{
@@ -94,6 +97,8 @@ public class ClientDAO
 					{
 						System.out.println(availableAssessments.get(i));
 					}
+					
+					return availableAssessments;
 				}
 				else{
 					System.out.println("No available assessments");
@@ -108,7 +113,7 @@ public class ClientDAO
 			e.printStackTrace();
 		} catch (NoMatchingAssessment e) {
 			// TODO Auto-generated catch block
-			System.err.println("Assesment for that course code does not exist");
+			System.err.println("Assessment for that course code does not exist");
 			e.printStackTrace();
 		}
 		return null;
@@ -116,9 +121,12 @@ public class ClientDAO
 	}
 	
 	// Return an Assessment object associated with a particular course code
-	public Assessment getAssessment(int token, int studentid, String courseCode){
+	public Assessment getAssessment(int token, int studentid, String courseCode)
+	{
+		Assessment assessment = null;
+		
 		try {
-			Assessment assessment = examServer.getAssessment(accessToken, 16316271, "CT414");
+			assessment = examServer.getAssessment(token, studentid, courseCode);
 			
 			clientAssessmentList.add(assessment);
 			
@@ -135,18 +143,19 @@ public class ClientDAO
 			System.err.println("Assesment for that course code does not exist");
 			e.printStackTrace();
 		}
-		return null;
+		return assessment;
 		
 	}
 
 	// Submit a completed assessment
 	public void submitAssessment(int token, int studentid, Assessment completed)
 	{
-		Assessment assessment =clientAssessmentList.get(0);
 		
 		try {	
-			System.out.println("Submit Assessment");
-			examServer.submitAssessment(accessToken, 16316271, assessment);			
+			System.out.println("submitAssessment() - " + completed.getInformation());
+			examServer.submitAssessment(token, studentid, completed);
+			clientAssessmentList.remove(completed); //remove assignment from list
+			System.out.println("submitAssessment() - assessment now removed from ClientDAO");
 		} 
 		catch (RemoteException e) {
 			// TODO Auto-generated catch block
