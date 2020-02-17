@@ -20,8 +20,12 @@ public class CommsAssessment implements Assessment
 	public CommsAssessment(int studentID)
 	{
 		this.studentID = studentID;
-		questionList.add(new Question1());
-		questionList.add(new Question2());
+		
+		String[] answers1 = {"Bring Shovel", "Don't forget it!", "Leave shovel at home"};
+		questionList.add(new QuestionComms(1, "Don't forget to bring your shovel to work", answers1));
+		
+		String[] answers2 = {"on", "yer wan", "the wave bro"};
+		questionList.add(new QuestionComms(2, "Ride __", answers2));
 	}
 
 	public String getInformation() {
