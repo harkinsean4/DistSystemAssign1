@@ -1,6 +1,11 @@
-package server;
+/*
+ * Exam Engine is a remote object and also runs the main server program code
+ * it makes itself available to the client by adding itself to rmi registry
+ * it looks after client request to login and keeps track of what assessments
+ * client gets and submits by using hashmaps
+ */
 
-// TIP: The return statement will not run if the exception is thrown.
+package server;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -127,7 +132,7 @@ public class ExamEngine implements ExamServer
 	    			  }
 	    			  else{
 	    				  // else user is still active
-	    				  System.out.println("" + studentid + " is still active");
+	    				  // System.out.println("" + studentid + " is still active");
 	    				  loggedintimerHashMap.put(ACCESSTOKEN, true);
 	    			  }
 	    				  
@@ -300,8 +305,15 @@ public class ExamEngine implements ExamServer
 			
 			System.out.println("Inserting completed assessment: " + completed.getInformation());
 			submittedAssessmentArrayList.add(completed);
-			
 			submittedAssessmentHashMap.put(studentid, submittedAssessmentArrayList);
+			
+			ArrayList<Question> completedQuestionList = (ArrayList<Question>) completed.getQuestions();
+			
+			for(int i = 0; i < completedQuestionList.size(); i ++){
+				
+				Question question = completedQuestionList.get(i);	
+				System.out.println(question.getQuestionDetail() + "?\nAnswer = " + completed.getSelectedAnswer(question.getQuestionNumber()));
+			}
     	}
 		else{
 			throw new UnauthorizedAccess("Access token has timed out");

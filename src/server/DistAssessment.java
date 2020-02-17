@@ -23,10 +23,10 @@ public class DistAssessment implements Assessment
 		this.studentID = studentID;
 		this.assessmentNumber = assessmentNumber;
 		
-		String[] answers1 = {"Yeah fackin nah", "Nah fackin yeah", "Course Dude"};
+		String[] answers1 = {"Yeah nah", "Nah yeah", "Course Dude"};
 		questionList.add(new QuestionDist(1, "Could you skate down a quarter pipe?", answers1));
 		
-		String[] answers2 = {"Goblin", "Fairy", "Snookum"};
+		String[] answers2 = {"Goblin", "Fairy", "President"};
 		questionList.add(new QuestionDist(2, "Michael D _______ Higgins", answers2));
 	}
 
@@ -54,14 +54,39 @@ public class DistAssessment implements Assessment
 
 	public Question getQuestion(int questionNumber) throws InvalidQuestionNumber 
 	{
-		return questionList.get(questionNumber);
+		Question question = null;
+		
+		if(questionNumber <= questionList.size())
+		{
+			//if questionNumber request is greater than size of question lidt 
+			question = questionList.get(questionNumber);
+		}
+		else 
+		{
+			throw new InvalidQuestionNumber(); 
+		}
+		
+		return question;
 	}
 
 	// Answer a particular question
 	public void selectAnswer(int questionNumber, int optionNumber)
 			throws InvalidQuestionNumber, InvalidOptionNumber 
 	{
-		answerMap.put(questionList.get(questionNumber), optionNumber);
+		if(questionNumber <= questionList.size())
+		{
+			//if questionNumber request is greater than size of question list
+			if(optionNumber <= questionList.size()){
+				answerMap.put(questionList.get(questionNumber), optionNumber);
+			}
+			else{
+				throw new InvalidQuestionNumber(); 
+			}
+		}
+		else 
+		{
+			throw new InvalidQuestionNumber(); 
+		}
 	}
 
 	// Return selected answer or zero if none selected yet
