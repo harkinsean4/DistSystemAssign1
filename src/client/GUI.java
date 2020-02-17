@@ -17,6 +17,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.security.auth.spi.LoginModule;
 import javax.swing.ButtonGroup;
@@ -65,6 +66,7 @@ public class GUI extends JFrame implements Serializable {
 	
 	private int studentID;
 	private String studentPassword;
+	private Date due;
 	
 	private int token;
 	
@@ -93,39 +95,36 @@ public class GUI extends JFrame implements Serializable {
 		
 		frame.remove(loginPage);
 		
-		Assessment dist = new DistAssessment(studentID);
-		CommsAssessment coms = new CommsAssessment(studentID);
-		
 		assessmentNames = new ArrayList<String>();
-		assessments = new ArrayList<Assessment>();
 		
-		assessmentNames.add(dist.getInformation());
-		assessmentNames.add(coms.getInformation());
-		
+		for (int i = 0; i < assessments.size(); i++)
+			assessmentNames.add(assessments.get(i).getInformation());
+				
 		information = new JPanel(new GridBagLayout());
 		GridBagConstraints b = new GridBagConstraints();
 		
 		b.insets = new Insets(0,0,0,0);
 		
-		assessmentInfo = new JTextArea("This is where the assignment \ninformation will go ");
+		assessmentInfo = new JTextArea(assessments.get(0).getInformation());
 		assessmentInfo.setFont(boldText);
 		assessmentInfo.setEditable(false);
 		assessmentInfo.setSelectionColor(null);
 		b.gridx = 1;
 		b.gridy = 1;
-		b.gridheight = 3;
 		information.add(assessmentInfo, b);
 		
-		studentNumber = new JLabel("Student Number: " + studentID);
+		studentNumber = new JLabel("ID: " + assessments.get(0).getAssociatedID());
 		studentNumber.setFont(boldText);
-		b.gridx = 3;
+		b.gridx = 1;
 		b.gridy = 2;
 		information.add(studentNumber, b);
 		
-		dueDate = new JLabel("Due Date: 14/02/2020");
+		due = assessments.get(0).getClosingDate();
+		
+		dueDate = new JLabel(due.toString());
 		dueDate.setFont(boldText);
 		b.gridx = 2;
-		b.gridy = 4;
+		b.gridy = 1;
 		information.add(dueDate, b);
 		
 		east = new JPanel( new BorderLayout());
@@ -219,7 +218,7 @@ public class GUI extends JFrame implements Serializable {
 		d.gridy = 1;
 		sideView.add(assignHeader, d);
 		
-		availableAssessments = new JList(assessments.toArray());
+		availableAssessments = new JList(assessmentNames.toArray());
 		availableAssessments.setVisibleRowCount(3);
 		availableAssessments.setFont(regText);
 		d.gridx = 1;
@@ -238,7 +237,9 @@ public class GUI extends JFrame implements Serializable {
 						if(availableAssessments.getSelectedIndex() == 0 ) {	
 							ptr = 0;
 							assessmentInfo.setText(assessmentNames.get(ptr));
-							dueDate.setText("17/02/2020 11:59.59");
+							
+							due = assessments.get(ptr).getClosingDate();
+							dueDate.setText(due.toString());
 							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
 							option1Text.setText(answers1[availableAssessments.getSelectedIndex()]);
 							option2Text.setText(answers1[availableAssessments.getSelectedIndex() + 1]);
@@ -247,7 +248,9 @@ public class GUI extends JFrame implements Serializable {
 						if(availableAssessments.getSelectedIndex() == 1 ) {
 							ptr = 1;
 							assessmentInfo.setText(assessmentNames.get(ptr));
-							dueDate.setText("27/02/2020 11:59.59");
+
+							due = assessments.get(ptr).getClosingDate();
+							dueDate.setText(due.toString());
 							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
 							option1Text.setText(answers2[availableAssessments.getSelectedIndex()- 1 ]);
 							option2Text.setText(answers2[availableAssessments.getSelectedIndex()    ]);
@@ -277,7 +280,7 @@ public class GUI extends JFrame implements Serializable {
 		frame.getContentPane().add(assessmentPage);
 		
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-	    frame.setSize(900, 400);
+	    frame.setSize(650, 400);
 	    frame.setLocation(100, 100);
 	    frame.setVisible(true);
 		
@@ -286,7 +289,8 @@ public class GUI extends JFrame implements Serializable {
 	public void loginPage(JFrame frame) {
 //		frame = new JFrame("RSI Assessment");
 		
-
+		assessments = new ArrayList<Assessment>();
+		
 		loginPage = new JPanel(new GridBagLayout());
 		GridBagConstraints a = new GridBagConstraints();
 		
@@ -343,7 +347,11 @@ public class GUI extends JFrame implements Serializable {
 					
 					for(int i =0; i < availableAssessmentStrings.size(); i ++)
 					{
-						assessments.add(clientDAO.getAssessment(token, studentID, availableAssessmentStrings.get(i)));
+						System.out.println("GUI: " + availableAssessmentStrings.get(i));
+						Assessment ass = clientDAO.getAssessment(token, studentID, availableAssessmentStrings.get(i));
+						if(ass != null) {
+							assessments.add(ass);
+						}
 					}
 					
 					//assessments.add(clientDAO.getAssessment(token, studentID, "CT414"));
@@ -362,7 +370,7 @@ public class GUI extends JFrame implements Serializable {
 	    frame.getContentPane().add(loginPage);
 	    
 	    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        frame.setSize(600, 400);
+        frame.setSize(400, 400);
         frame.setLocation(100, 100);
         frame.setVisible(true);
 	}
