@@ -227,40 +227,37 @@ public class ExamEngine implements ExamServer
 	        			Assessment assessment = (Assessment) submittedAssessmentArrayList.get(i);
 	        			String assessmentCode = assessment.getInformation();
 	        			
-	            		if (courseCode.contains(DISTCOURSECODE)){
-	            			throw new NoMatchingAssessment("You have already completed this assessment! - " + DISTCOURSECODE);
-	            		}
-	            		else if (courseCode.contains(COMMSCOURSECODE)){
-	            			throw new NoMatchingAssessment("You have already completed this assessment!- " + COMMSCOURSECODE);
+	            		if (courseCode.contains(assessmentCode))
+	            		{
+	            			//if the request course code is sontained in the submitted assessment list then throw exception
+	            			throw new NoMatchingAssessment("You have already completed this assessment! - " + courseCode);
 	            		}
 	            	}
 					// close for loop looping through submitted assessments
 				}
 			} 
-			else
-			{
-			// else student has never submitted an assessment before
-	
+			else{
+			// else student has never submitted an assessment before	
 				// if student has never submitted an assessment before, put in an empty array list in submittedHashMap
 				System.out.println("getAssessment() - " +studentid + ", this student has never submitted an assessment before");
 				ArrayList<Assessment> newSubmittedAssessmentArrayList = new ArrayList<Assessment>();
 				submittedAssessmentHashMap.put(studentid, newSubmittedAssessmentArrayList);
-				
-	    		//get the assessment object according to requested course code
-		    	if (courseCode.equals(DISTCOURSECODE))
-		    	{
-		    		System.out.println("getAssessment() for: " + courseCode);
-		    		assessmentObj = new DistAssessment(studentid, 1);
-		    	}
-		    	else if (courseCode.equals(COMMSCOURSECODE))
-		    	{
-		    		System.out.println("getAssessment() for: " + courseCode);
-		    		assessmentObj = new CommsAssessment(studentid, 2);
-		    	}
-		    	else{
-		    		throw new NoMatchingAssessment("No matching assessment for course code: " + courseCode);
-		    	}
 			}
+				
+    		//get the assessment object according to requested course code
+	    	if (courseCode.equals(DISTCOURSECODE))
+	    	{
+	    		System.out.println("getAssessment() for: " + courseCode);
+	    		assessmentObj = new DistAssessment(studentid, 1);
+	    	}
+	    	else if (courseCode.equals(COMMSCOURSECODE))
+	    	{
+	    		System.out.println("getAssessment() for: " + courseCode);
+	    		assessmentObj = new CommsAssessment(studentid, 2);
+	    	}
+	    	else{
+	    		throw new NoMatchingAssessment("No matching assessment for course code: " + courseCode);
+	    	}
     	}
     	else{
 			throw new UnauthorizedAccess("Access token has timed out");
