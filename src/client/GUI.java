@@ -471,6 +471,8 @@ public class GUI extends JFrame implements Serializable {
 						} catch (InvalidQuestionNumber e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
+							frame.remove(loginPage);
+							frame.add(loginPage);
 						}
 					}
 				}
