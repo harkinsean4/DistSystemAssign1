@@ -4,6 +4,10 @@ import client.ClientDAO;
 import server.Assessment;
 import server.CommsAssessment;
 import server.DistAssessment;
+import server.InvalidOptionNumber;
+import server.InvalidQuestionNumber;
+import server.Question;
+
 import java.util.List;
 
 import java.awt.BorderLayout;
@@ -22,6 +26,7 @@ import java.util.Date;
 import javax.security.auth.spi.LoginModule;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -59,7 +64,8 @@ public class GUI extends JFrame implements Serializable {
 	private ButtonGroup optionGroup;
 	private JList 		availableAssessments;
 	
-	private ButtonModel submitAnswerMo;
+	private ButtonModel submitAnswerMo, nextMo;
+	private DefaultListModel model;
 	
 	private ArrayList<String> assessmentNames;
 	private ArrayList<Assessment> assessments;
@@ -74,24 +80,23 @@ public class GUI extends JFrame implements Serializable {
 	private Font regText = new Font("Arial", Font.PLAIN, 18);
 	
 	//--------------------------Test Strings----------------------------------//
-	private String[] questionsString = {"Can a duck swim", "How high can you jump", "Can a circle go in the square hole"};
-	
-	private String[] answers1 = {"Yes", "No", "Maybe"};
-	private String[] answers2 = {"High", "Low", "Picolo"};
+	private List<Question> qs;
+	private String[] as;
+	private int selectedAns = -1;
+	private int ptr;
+	private int qPtr;
 	
 	private ClientDAO clientDAO;
 	
 	public GUI() {
 		
-		JFrame fr = new JFrame("RSI Assessment");
-		loginPage(fr);
-		
-		
 		clientDAO = new ClientDAO();
 		
+		JFrame fr = new JFrame("RSI Assessment");
+		loginPage(fr);
 	}
 	
-	public void assessmentPage(JFrame frame) {
+	public void assessmentPage(JFrame frame) throws InvalidQuestionNumber {
 		
 		frame.remove(loginPage);
 		
@@ -99,7 +104,7 @@ public class GUI extends JFrame implements Serializable {
 		
 		for (int i = 0; i < assessments.size(); i++)
 			assessmentNames.add(assessments.get(i).getInformation());
-				
+
 		information = new JPanel(new GridBagLayout());
 		GridBagConstraints b = new GridBagConstraints();
 		
@@ -135,7 +140,7 @@ public class GUI extends JFrame implements Serializable {
 		
 		c.insets = new Insets(0,0,0,0);
 		
-		questionField = new JTextArea("The question will go here");
+		questionField = new JTextArea(assessments.get(0).getQuestion(0).getQuestionDetail());
 		questionField.setFont(boldText);
 		questionField.setEditable(false);
 		questionField.setSize(800, 30);
@@ -169,21 +174,21 @@ public class GUI extends JFrame implements Serializable {
 		option2.addItemListener(rHandler);
 		option3.addItemListener(rHandler);
 		
+		String[] answers = assessments.get(0).getQuestion(0).getAnswerOptions();
 		
-		
-		option1Text = new JLabel("Option 1");
+		option1Text = new JLabel(answers[0]);
 		option1Text.setFont(regText);
 		c.gridx = 2;
 		c.gridy = 2;
 		questions.add(option1Text, c);
 		
-		option2Text = new JLabel("Option 2");
+		option2Text = new JLabel(answers[1]);
 		option2Text.setFont(regText);
 		c.gridx = 2;
 		c.gridy = 3;
 		questions.add(option2Text, c);
 		
-		option3Text = new JLabel("Option 3");
+		option3Text = new JLabel(answers[2]);
 		option3Text.setFont(regText);
 		c.gridx = 2;
 		c.gridy = 4;
@@ -198,11 +203,70 @@ public class GUI extends JFrame implements Serializable {
 		
 		submitAnswer = new JButton("Submit");
 		submitAnswer.setFont(boldText);
+		submitAnswer.setEnabled(false);
 		c.gridx = 2;
 		c.gridy = 5;
 		//c.gridwidth = 3;
 		questions.add(submitAnswer, c);
 		
+		nextMo = next.getModel();
+		submitAnswerMo = submitAnswer.getModel();
+		
+		nextMo.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("GUI: Next was pressed");
+				if(selectedAns != -1) {
+					try {
+						assessments.get(ptr).selectAnswer(qPtr, selectedAns);
+					} catch (InvalidQuestionNumber | InvalidOptionNumber e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				
+					qPtr++;
+					nextQuestion(qPtr);
+					availableAssessments.setEnabled(false);
+					optionGroup.clearSelection();
+					if (qPtr == qs.size()-1) {
+						next.setEnabled(false);
+						submitAnswer.setEnabled(true);
+						System.out.println("GUI: Last question reached");
+					}
+				}
+			}
+		});
+
+		submitAnswerMo.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("GUI: Submit was pressed");
+				clientDAO.submitAssessment(token, studentID, assessments.get(ptr));
+				
+				assessments.remove(ptr);
+				model.clear();
+				if(assessments.size()!= 0) {
+					for (int i = 0; i < assessments.size(); i++) {
+						assessmentNames.add(assessments.get(i).getInformation());
+						model.add(i, assessmentNames.get(i));
+					}
+					ptr = 0;
+					qPtr = 0;
+					next.setEnabled(true);
+					availableAssessments.setEnabled(true);
+					submitAnswer.setEnabled(false);
+					optionGroup.clearSelection();
+					selectedAns = -1;
+					nextQuestion(qPtr);
+				}
+				else {
+					
+					
+				}
+			}
+			
+		});
 		east.add(questions, BorderLayout.CENTER);
 		
 		//assessmentPage.add(questions, BorderLayout.CENTER);
@@ -218,7 +282,14 @@ public class GUI extends JFrame implements Serializable {
 		d.gridy = 1;
 		sideView.add(assignHeader, d);
 		
-		availableAssessments = new JList(assessmentNames.toArray());
+		availableAssessments = new JList();
+		
+		model = new DefaultListModel();
+		availableAssessments.setModel(model);
+		for(int i = 0; i < assessmentNames.size(); i++) 
+		{
+			model.add(i, assessmentNames.get(i));
+		}
 		availableAssessments.setVisibleRowCount(3);
 		availableAssessments.setFont(regText);
 		d.gridx = 1;
@@ -233,37 +304,14 @@ public class GUI extends JFrame implements Serializable {
 					@Override
 					public void valueChanged( ListSelectionEvent event ) 
 					{
-						int ptr;
-						if(availableAssessments.getSelectedIndex() == 0 ) {	
-							ptr = 0;
-							assessmentInfo.setText(assessmentNames.get(ptr));
-							
+						
+						ptr = availableAssessments.getSelectedIndex();
+						dueDate.setText(due.toString());
+						if(ptr != -1)
 							due = assessments.get(ptr).getClosingDate();
-							dueDate.setText(due.toString());
-							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
-							option1Text.setText(answers1[availableAssessments.getSelectedIndex()]);
-							option2Text.setText(answers1[availableAssessments.getSelectedIndex() + 1]);
-							option3Text.setText(answers1[availableAssessments.getSelectedIndex() + 2]);
-						}
-						if(availableAssessments.getSelectedIndex() == 1 ) {
-							ptr = 1;
-							assessmentInfo.setText(assessmentNames.get(ptr));
-
-							due = assessments.get(ptr).getClosingDate();
-							dueDate.setText(due.toString());
-							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
-							option1Text.setText(answers2[availableAssessments.getSelectedIndex()- 1 ]);
-							option2Text.setText(answers2[availableAssessments.getSelectedIndex()    ]);
-							option3Text.setText(answers2[availableAssessments.getSelectedIndex() + 1]);
-						}
-//						if(availableAssessments.getSelectedIndex() == 2 ) {
-//							assessmentInfo.setText("This is Assignment 3: \nSpeech Processing for EE444");
-//							dueDate.setText("22/03/2020 11:59.59");
-//							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
-//							option1Text.setText(answers1[availableAssessments.getSelectedIndex() - 2]);
-//							option2Text.setText(answers1[availableAssessments.getSelectedIndex() - 1]);
-//							option3Text.setText(answers1[availableAssessments.getSelectedIndex()]);
-//						}
+						qPtr = 0;
+						
+						nextQuestion(qPtr);
 					}
 				}
 		);
@@ -304,7 +352,7 @@ public class GUI extends JFrame implements Serializable {
 		a.gridy = 1;
 		loginPage.add(username, a);
 		
-		userInput = new JTextField("Student Name");
+		userInput = new JTextField("16484724");
 		userInput.setFont(regText);
 		userInput.setSize(200, 50);
 	    a.gridx = 2;
@@ -317,7 +365,7 @@ public class GUI extends JFrame implements Serializable {
 		a.gridy = 2;
 		loginPage.add(password, a);
 		
-		passInput = new JPasswordField("122345678");
+		passInput = new JPasswordField("fergy");
 		passInput.setFont(regText);
 		passInput.setSize(200, 50);
 	    a.gridx = 2;
@@ -359,7 +407,12 @@ public class GUI extends JFrame implements Serializable {
 					
 					
 					if(token != 0) {
-						assessmentPage(frame);
+						try {
+							assessmentPage(frame);
+						} catch (InvalidQuestionNumber e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 					}
 				}
 				
@@ -375,10 +428,17 @@ public class GUI extends JFrame implements Serializable {
         frame.setVisible(true);
 	}
 	
-	
+	public void nextQuestion(int q) {
+		qs = assessments.get(ptr).getQuestions();
+		as = qs.get(q).getAnswerOptions();
+		selectedAns = -1;
 
-	public static void main(String[] args) {
-		GUI gui = new GUI();
+		assessmentInfo.setText(assessmentNames.get(ptr));
+			
+		questionField.setText(qs.get(q).getQuestionDetail());
+		option1Text.setText(as[0]);
+		option2Text.setText(as[1]);
+		option3Text.setText(as[2]);
 	}
 	
 	private class RadioButtonHandler implements ItemListener {
@@ -387,18 +447,21 @@ public class GUI extends JFrame implements Serializable {
 		public void itemStateChanged(ItemEvent e) {
 			if( e.getSource() == option1 ) 
 			{
-//				option2.
+				selectedAns = 0;
 			}
 			if (e.getSource() == option2 )
 			{
-	  
+				selectedAns = 1;
 			}
 			if (e.getSource() == option3 ) 
 			{
-				
+				selectedAns = 2;
 			}
-			
 		}
+	}
+	
+	public static void main(String[] args) {
+		GUI gui = new GUI();
 	}
 }
 
