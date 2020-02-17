@@ -100,16 +100,22 @@ public class GUI extends JFrame implements Serializable {
 		
 		frame.remove(loginPage);
 		
+		
+		//Populating names for JList
 		assessmentNames = new ArrayList<String>();
 		
 		for (int i = 0; i < assessments.size(); i++)
 			assessmentNames.add(assessments.get(i).getInformation());
+		
+		//Creating information panel holding assignment info
 
 		information = new JPanel(new GridBagLayout());
 		GridBagConstraints b = new GridBagConstraints();
 		
 		b.insets = new Insets(0,0,0,0);
 		
+		
+		//Adding assessment info text area to panel
 		assessmentInfo = new JTextArea(assessments.get(0).getInformation());
 		assessmentInfo.setFont(boldText);
 		assessmentInfo.setEditable(false);
@@ -118,28 +124,34 @@ public class GUI extends JFrame implements Serializable {
 		b.gridy = 1;
 		information.add(assessmentInfo, b);
 		
+		// Adding student bumer label
 		studentNumber = new JLabel("ID: " + assessments.get(0).getAssociatedID());
 		studentNumber.setFont(boldText);
 		b.gridx = 1;
 		b.gridy = 2;
 		information.add(studentNumber, b);
 		
-		due = assessments.get(0).getClosingDate();
 		
+		// Making local date object to initially populate date textfield
+		due = assessments.get(0).getClosingDate();
 		dueDate = new JLabel(due.toString());
 		dueDate.setFont(boldText);
 		b.gridx = 2;
 		b.gridy = 1;
 		information.add(dueDate, b);
 		
+		
+		// Initialising panel to be placed at east of frame
 		east = new JPanel( new BorderLayout());
 		east.add(information, BorderLayout.NORTH);
 		
+		// Initialising Questions panel to handle buttons etc
 		questions = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		
 		c.insets = new Insets(0,0,0,0);
 		
+		// Initialising text area
 		questionField = new JTextArea(assessments.get(0).getQuestion(0).getQuestionDetail());
 		questionField.setFont(boldText);
 		questionField.setEditable(false);
@@ -149,6 +161,8 @@ public class GUI extends JFrame implements Serializable {
 		//c.gridwidth = 4;
 		questions.add(questionField, c);
 		
+		
+		// Initialising option radio buttons and adding them to logical button group
 		option1 = new JRadioButton();
 		c.gridx = 1;
 		c.gridy = 2;
@@ -169,11 +183,13 @@ public class GUI extends JFrame implements Serializable {
 		optionGroup.add(option2);
 		optionGroup.add(option3);
 		
+		// Creating Radio button handler for all radio buttons
 		RadioButtonHandler rHandler = new RadioButtonHandler();
 		option1.addItemListener(rHandler);
 		option2.addItemListener(rHandler);
 		option3.addItemListener(rHandler);
 		
+		// Creating string array to initially populate options, along with assigning values to text boxes
 		String[] answers = assessments.get(0).getQuestion(0).getAnswerOptions();
 		
 		option1Text = new JLabel(answers[0]);
@@ -194,6 +210,7 @@ public class GUI extends JFrame implements Serializable {
 		c.gridy = 4;
 		questions.add(option3Text, c);
 		
+		// Creating next & submit buttons
 		next = new JButton("Next");
 		next.setFont(boldText);
 		c.gridx = 1;
@@ -209,6 +226,8 @@ public class GUI extends JFrame implements Serializable {
 		//c.gridwidth = 3;
 		questions.add(submitAnswer, c);
 		
+		
+		// Adding models to buttons to allow functionality
 		nextMo = next.getModel();
 		submitAnswerMo = submitAnswer.getModel();
 		
@@ -217,15 +236,23 @@ public class GUI extends JFrame implements Serializable {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("GUI: Next was pressed");
+				// If selected answer value is -1, next button does nothing. Otherwise, it takes the 
+				// assigned value for selected answer and calls the clientDAO.selectAnswer() method.
+				// This then increments the question pointer qPnt and calls the nextQuestion method.
+				// If the pointer is the same value as the questions arraylist size, it enables the 
+				// submit button.
 				if(selectedAns != -1) {
 					try {
 						assessments.get(ptr).selectAnswer(qPtr, selectedAns);
+						System.out.println("GUI: selected answers added");
 					} catch (InvalidQuestionNumber | InvalidOptionNumber e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				
+					
 					qPtr++;
+					System.out.println("GUI: question pointer: " + qPtr);
 					nextQuestion(qPtr);
 					availableAssessments.setEnabled(false);
 					optionGroup.clearSelection();
@@ -241,6 +268,11 @@ public class GUI extends JFrame implements Serializable {
 		submitAnswerMo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				// If pressed, the assessment is submitted using the clientDAO.submitAssessment method.
+				// Following, it repopulates the JList housing assessment objects, resets all pointers
+				// and resets GUI to initial login setup. If all assessments have been completed, the
+				// GUI is cleared and all buttons are disabled
+				
 				System.out.println("GUI: Submit was pressed");
 				clientDAO.submitAssessment(token, studentID, assessments.get(ptr));
 				
@@ -261,27 +293,39 @@ public class GUI extends JFrame implements Serializable {
 					nextQuestion(qPtr);
 				}
 				else {
+					assessmentInfo.setText("");
 					
+					questionField.setText("Yay! Looks like you're on top of\nyour work!");
+					option1Text.setText("");
+					option2Text.setText("");
+					option3Text.setText("");
 					
+					submitAnswer.setEnabled(false);
+					option1.setEnabled(false);
+					option2.setEnabled(false);
+					option3.setEnabled(false);
 				}
 			}
 			
 		});
 		east.add(questions, BorderLayout.CENTER);
 		
-		//assessmentPage.add(questions, BorderLayout.CENTER);
-		
+
+		// Initialising sideview panel for JList
 		sideView = new JPanel(new GridBagLayout());
 		GridBagConstraints d = new GridBagConstraints();
 		
 		d.insets = new Insets(0,0,0,0);
 		
+		// Initialising head label
 		assignHeader = new JLabel("Assignments Available");
 		assignHeader.setFont(boldText);
 		d.gridx = 1;
 		d.gridy = 1;
 		sideView.add(assignHeader, d);
 		
+		
+		// Initialising list and model to edit list parmameters, and adding values
 		availableAssessments = new JList();
 		
 		model = new DefaultListModel();
@@ -304,27 +348,34 @@ public class GUI extends JFrame implements Serializable {
 					@Override
 					public void valueChanged( ListSelectionEvent event ) 
 					{
-						
+						// If value changes, assessment pointer ptr is changed to current value selected
+						// and date is updated
 						ptr = availableAssessments.getSelectedIndex();
 						dueDate.setText(due.toString());
-						if(ptr != -1)
+						if(ptr != -1) {
 							due = assessments.get(ptr).getClosingDate();
-						qPtr = 0;
-						
-						nextQuestion(qPtr);
+							qPtr = 0;
+							System.out.println("GUI: Assessment Pointer: " + ptr);
+							nextQuestion(qPtr);
+						}
 					}
 				}
 		);
 		
+		// Panel initialised to be placed at west of frame
 		west = new JPanel(new BorderLayout());
 		west.add(sideView, BorderLayout.WEST);
 		
+		
+		// Main panel
 		assessmentPage = new JPanel( new BorderLayout());
 		
 		assessmentPage.add(east, BorderLayout.EAST);
 		assessmentPage.add(west, BorderLayout.WEST);
 		//assessmentPage.add(east, BorderLayout.EAST);
 		
+		
+		// Adding components to main frame
 		frame.getContentPane().add(assessmentPage);
 		
 		frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
@@ -335,10 +386,11 @@ public class GUI extends JFrame implements Serializable {
 	}
 	
 	public void loginPage(JFrame frame) {
-//		frame = new JFrame("RSI Assessment");
-		
+
+		// Initialising assessment arraylist
 		assessments = new ArrayList<Assessment>();
 		
+		// Login Page panel
 		loginPage = new JPanel(new GridBagLayout());
 		GridBagConstraints a = new GridBagConstraints();
 		
@@ -346,12 +398,15 @@ public class GUI extends JFrame implements Serializable {
 //		a.gridheight = 3;
 //		a.gridwidth = 2;
 		
+		// Username JLabel
 		username = new JLabel ("Username: ");
 		username.setFont(boldText);
 		a.gridx = 1;
 		a.gridy = 1;
 		loginPage.add(username, a);
 		
+		
+		// Username input field
 		userInput = new JTextField("16484724");
 		userInput.setFont(regText);
 		userInput.setSize(200, 50);
@@ -359,12 +414,14 @@ public class GUI extends JFrame implements Serializable {
 	    a.gridy = 1;
 	    loginPage.add(userInput, a);
 	    
+	    // Password Label
 	    password = new JLabel ("Password: ");
 		password.setFont(boldText);
 		a.gridx = 1;
 		a.gridy = 2;
 		loginPage.add(password, a);
 		
+		// Password field
 		passInput = new JPasswordField("fergy");
 		passInput.setFont(regText);
 		passInput.setSize(200, 50);
@@ -372,6 +429,8 @@ public class GUI extends JFrame implements Serializable {
 	    a.gridy = 2;
 	    loginPage.add(passInput, a);
 	    
+	    
+	    // Login button
 	    login = new JButton("Login");
 	    login.setFont(boldText);
 	    a.gridx = 1;
@@ -385,6 +444,10 @@ public class GUI extends JFrame implements Serializable {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
+				// Uses clientDAO.login() method to login to server, and retrieves login token. 
+				// It finds all assessments available to the user, and adds them to a string list.
+				// then, these items are added to the assessments array initialised earlier
 				if(e.getSource() == loginMo) {
 					//System.out.println("login pressed");
 					
@@ -401,11 +464,7 @@ public class GUI extends JFrame implements Serializable {
 							assessments.add(ass);
 						}
 					}
-					
-					//assessments.add(clientDAO.getAssessment(token, studentID, "CT414"));
-					// assessments.add(clientDAO.getAssessment(token, studentID, "EE444"));
-					
-					
+					// If the token is not 0, the assessmentPage method is called					
 					if(token != 0) {
 						try {
 							assessmentPage(frame);
@@ -420,6 +479,7 @@ public class GUI extends JFrame implements Serializable {
 	    });
 	    
 	    
+	    // Adding panel to frame
 	    frame.getContentPane().add(loginPage);
 	    
 	    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
@@ -428,11 +488,12 @@ public class GUI extends JFrame implements Serializable {
         frame.setVisible(true);
 	}
 	
+	// Method to cycle through questions
 	public void nextQuestion(int q) {
 		qs = assessments.get(ptr).getQuestions();
 		as = qs.get(q).getAnswerOptions();
 		selectedAns = -1;
-
+		
 		assessmentInfo.setText(assessmentNames.get(ptr));
 			
 		questionField.setText(qs.get(q).getQuestionDetail());
@@ -441,6 +502,7 @@ public class GUI extends JFrame implements Serializable {
 		option3Text.setText(as[2]);
 	}
 	
+	// Handler to change value for selected answer
 	private class RadioButtonHandler implements ItemListener {
 
 		@Override
@@ -448,18 +510,23 @@ public class GUI extends JFrame implements Serializable {
 			if( e.getSource() == option1 ) 
 			{
 				selectedAns = 0;
+				System.out.println("GUI: Selected answer: 0");
 			}
 			if (e.getSource() == option2 )
 			{
 				selectedAns = 1;
+				System.out.println("GUI: Selected answer: 1");
 			}
 			if (e.getSource() == option3 ) 
 			{
 				selectedAns = 2;
+				System.out.println("GUI: Selected answer: 2");
 			}
 		}
 	}
 	
+	
+	// Main
 	public static void main(String[] args) {
 		GUI gui = new GUI();
 	}

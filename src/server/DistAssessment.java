@@ -31,7 +31,7 @@ public class DistAssessment implements Assessment
 	}
 
 	public String getInformation() {
-		String information = ASSESSMENTNAME;
+		String information = "Assessment " + Integer.toString(assessmentNumber) + ". " + ASSESSMENTNAME;
 		
 		return information;
 	}
