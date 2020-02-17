@@ -1,6 +1,11 @@
   package client;
 
 import client.ClientDAO;
+import server.Assessment;
+import server.CommsAssessment;
+import server.DistAssessment;
+import java.util.List;
+
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -11,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import javax.security.auth.spi.LoginModule;
 import javax.swing.ButtonGroup;
@@ -54,9 +60,10 @@ public class GUI extends JFrame implements Serializable {
 	
 	private ButtonModel submitAnswerMo;
 	
-	private String[] assessments = {"CT414-1", "CT414-2", "EE444-1"};
+	private ArrayList<String> assessmentNames;
+	private ArrayList<Assessment> assessments;
 	
-	private String studentID;
+	private int studentID;
 	private String studentPassword;
 	
 	private int token;
@@ -85,6 +92,15 @@ public class GUI extends JFrame implements Serializable {
 	public void assessmentPage(JFrame frame) {
 		
 		frame.remove(loginPage);
+		
+		Assessment dist = new DistAssessment(studentID);
+		CommsAssessment coms = new CommsAssessment(studentID);
+		
+		assessmentNames = new ArrayList<String>();
+		assessments = new ArrayList<Assessment>();
+		
+		assessmentNames.add(dist.getInformation());
+		assessmentNames.add(coms.getInformation());
 		
 		information = new JPanel(new GridBagLayout());
 		GridBagConstraints b = new GridBagConstraints();
@@ -203,11 +219,11 @@ public class GUI extends JFrame implements Serializable {
 		d.gridy = 1;
 		sideView.add(assignHeader, d);
 		
-		availableAssessments = new JList(assessments);
+		availableAssessments = new JList(assessments.toArray());
 		availableAssessments.setVisibleRowCount(3);
 		availableAssessments.setFont(regText);
 		d.gridx = 1;
-		d.gridy = 20;
+		d.gridy = 2;
 		sideView.add(availableAssessments,d);
 		
 		availableAssessments.setSelectionMode ( ListSelectionModel.SINGLE_SELECTION);
@@ -218,8 +234,10 @@ public class GUI extends JFrame implements Serializable {
 					@Override
 					public void valueChanged( ListSelectionEvent event ) 
 					{
-						if(availableAssessments.getSelectedIndex() == 0 ) {		
-							assessmentInfo.setText("This is Assignment 1: \nRMI Assignment for CT414");
+						int ptr;
+						if(availableAssessments.getSelectedIndex() == 0 ) {	
+							ptr = 0;
+							assessmentInfo.setText(assessmentNames.get(ptr));
 							dueDate.setText("17/02/2020 11:59.59");
 							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
 							option1Text.setText(answers1[availableAssessments.getSelectedIndex()]);
@@ -227,21 +245,22 @@ public class GUI extends JFrame implements Serializable {
 							option3Text.setText(answers1[availableAssessments.getSelectedIndex() + 2]);
 						}
 						if(availableAssessments.getSelectedIndex() == 1 ) {
-							assessmentInfo.setText("This is Assignment 2: \nGUI Maker for CT414");
+							ptr = 1;
+							assessmentInfo.setText(assessmentNames.get(ptr));
 							dueDate.setText("27/02/2020 11:59.59");
 							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
 							option1Text.setText(answers2[availableAssessments.getSelectedIndex()- 1 ]);
 							option2Text.setText(answers2[availableAssessments.getSelectedIndex()    ]);
 							option3Text.setText(answers2[availableAssessments.getSelectedIndex() + 1]);
 						}
-						if(availableAssessments.getSelectedIndex() == 2 ) {
-							assessmentInfo.setText("This is Assignment 3: \nSpeech Processing for EE444");
-							dueDate.setText("22/03/2020 11:59.59");
-							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
-							option1Text.setText(answers1[availableAssessments.getSelectedIndex() - 2]);
-							option2Text.setText(answers1[availableAssessments.getSelectedIndex() - 1]);
-							option3Text.setText(answers1[availableAssessments.getSelectedIndex()]);
-						}
+//						if(availableAssessments.getSelectedIndex() == 2 ) {
+//							assessmentInfo.setText("This is Assignment 3: \nSpeech Processing for EE444");
+//							dueDate.setText("22/03/2020 11:59.59");
+//							questionField.setText(questionsString[availableAssessments.getSelectedIndex()]);
+//							option1Text.setText(answers1[availableAssessments.getSelectedIndex() - 2]);
+//							option2Text.setText(answers1[availableAssessments.getSelectedIndex() - 1]);
+//							option3Text.setText(answers1[availableAssessments.getSelectedIndex()]);
+//						}
 					}
 				}
 		);
@@ -317,8 +336,19 @@ public class GUI extends JFrame implements Serializable {
 				if(e.getSource() == loginMo) {
 					//System.out.println("login pressed");
 					
-					token = clientDAO.login(Integer.parseInt(userInput.getText()), passInput.getText());
-					studentID = userInput.getText();
+					studentID = Integer.parseInt(userInput.getText());
+					token = clientDAO.login(studentID, passInput.getText());
+					
+					List<String> availableAssessmentStrings = clientDAO.getAvailableSummary(token, studentID);
+					
+					for(int i =0; i < availableAssessmentStrings.size(); i ++)
+					{
+						assessments.add(clientDAO.getAssessment(token, studentID, availableAssessmentStrings.get(i)));
+					}
+					
+					//assessments.add(clientDAO.getAssessment(token, studentID, "CT414"));
+					// assessments.add(clientDAO.getAssessment(token, studentID, "EE444"));
+					
 					
 					if(token != 0) {
 						assessmentPage(frame);
