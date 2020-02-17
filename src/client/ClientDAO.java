@@ -32,13 +32,13 @@ public class ClientDAO
         
         if(System.getProperty("java.class.path").contains("harki"))
         {
-        	System.out.print("Sean");
+        	//System.out.print("Sean");
         	System.setProperty("java.rmi.server.hostname","127.0.0.1");
         	System.setProperty("java.security.policy","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/client.policy");
         	System.setProperty("java.rmi.server.codebase","file:/c:/Users/harki/workspace/DS_RMI_SeanHarkin_Assignment_1/src/");
         }
         else{
-        	System.out.print("Darragh");
+        	//System.out.print("Darragh");
         	System.setProperty("java.rmi.server.hostname","127.0.0.1");
         	System.setProperty("java.security.policy","file:/c:/Users/Darragh/eclipse-workspace/DistSystemAssign1/src/client.policy");
         	System.setProperty("java.rmi.server.codebase","file:/c:/Users/Darragh/eclipse-workspace/DistSystemAssign1/src/");
@@ -75,10 +75,10 @@ public class ClientDAO
 			
 		} catch (RemoteException e) {
 			System.err.println("RemoteException - Unsuccessful login "+ e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (UnauthorizedAccess e) {
 			System.err.println("UnauthorizedAccess - Unsuccessful login "+ e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		
 		return accessToken;
@@ -111,13 +111,13 @@ public class ClientDAO
 			
 		} catch (RemoteException e) {
 			System.err.println("RemoteException - Unsuccessful login " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (UnauthorizedAccess e) {
 			System.err.println("UnauthorizedAccess - Unable to getAvailableSummary " +e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (NoMatchingAssessment e) {
 			System.err.println("NoMatchingAssessment - Unable to getAvailableSummary " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return null;
 		
@@ -135,13 +135,13 @@ public class ClientDAO
 			
 		} catch (RemoteException e) {
 			System.err.println("RemoteException -  Unable to getAssessment() " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (UnauthorizedAccess e) {
 			System.err.println("UnauthorizedAccess -  Unable to getAssessment() " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (NoMatchingAssessment e) {
 			System.err.println("NoMatchingAssessment -  Unable to getAssessment() " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 		return assessment;
 		
@@ -157,13 +157,13 @@ public class ClientDAO
 		} 
 		catch (RemoteException e) {
 			System.err.println("RemoteException -  Unable to submitAssessment() " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (UnauthorizedAccess e) {
 			System.err.println("UnauthorizedAccess -  Unable to submitAssessment() " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		} catch (NoMatchingAssessment e) {
 			System.err.println("NoMatchingAssessment -  Unable to submitAssessment() " + e.getMessage());
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 }
