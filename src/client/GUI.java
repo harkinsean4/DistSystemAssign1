@@ -317,7 +317,7 @@ public class GUI extends JFrame implements Serializable {
 					
 					//will need to retrieve text from boxes in GUI, hardcoded for now
 					
-					clientDAO.login(Integer.parseInt(userInput.getText()), passInput.getSelectedText());
+					clientDAO.login(Integer.parseInt(userInput.getText()), passInput.getText());
 					
 					assessmentPage(frame);
 				}
