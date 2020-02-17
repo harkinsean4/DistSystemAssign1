@@ -99,7 +99,7 @@ public class ClientDAO
 				{
 					for (int i = 0; i < availableAssessments.size(); i++)
 					{
-						System.out.println("ClientDAO: "+ availableAssessments.get(i));
+						//System.out.println("ClientDAO: "+ availableAssessments.get(i));
 					}
 					
 					return availableAssessments;
@@ -131,7 +131,7 @@ public class ClientDAO
 		try {
 			assessment = examServer.getAssessment(token, studentid, courseCode);
 			
-			System.out.println("ClientDAO - " + assessment.getInformation());
+			//System.out.println("ClientDAO - " + assessment.getInformation());
 			
 		} catch (RemoteException e) {
 			System.err.println("RemoteException -  Unable to getAssessment() " + e.getMessage());
@@ -148,22 +148,26 @@ public class ClientDAO
 	}
 
 	// Submit a completed assessment
-	public void submitAssessment(int token, int studentid, Assessment completed)
+	public int submitAssessment(int token, int studentid, Assessment completed)
 	{
+		int out = 0;
 		
 		try {	
 			examServer.submitAssessment(token, studentid, completed);
 			System.out.println("ClientDAO - submitAssessment() - " + completed.getInformation());
+			out = 1;
 		} 
 		catch (RemoteException e) {
 			System.err.println("RemoteException -  Unable to submitAssessment() " + e.getMessage());
 			//e.printStackTrace();
 		} catch (UnauthorizedAccess e) {
 			System.err.println("UnauthorizedAccess -  Unable to submitAssessment() " + e.getMessage());
+			out = 0;
 			//e.printStackTrace();
 		} catch (NoMatchingAssessment e) {
 			System.err.println("NoMatchingAssessment -  Unable to submitAssessment() " + e.getMessage());
 			//e.printStackTrace();
 		}
+		return out;
 	}
 }

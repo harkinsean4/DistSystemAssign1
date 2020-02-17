@@ -9,7 +9,6 @@ import server.InvalidQuestionNumber;
 import server.Question;
 
 import java.util.List;
-
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -31,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
@@ -274,8 +274,10 @@ public class GUI extends JFrame implements Serializable {
 				// GUI is cleared and all buttons are disabled
 				
 				System.out.println("GUI: Submit was pressed");
-				clientDAO.submitAssessment(token, studentID, assessments.get(ptr));
-				
+				int out = clientDAO.submitAssessment(token, studentID, assessments.get(ptr));
+				if(out == 1)
+				{
+					
 				assessments.remove(ptr);
 				model.clear();
 				if(assessments.size()!= 0) {
@@ -304,6 +306,12 @@ public class GUI extends JFrame implements Serializable {
 					option1.setEnabled(false);
 					option2.setEnabled(false);
 					option3.setEnabled(false);
+				}
+				}
+				else
+				{
+					JOptionPane.showMessageDialog(east, "Sorry, cannot submit assessment");
+					//System.out.println("Login timeout");
 				}
 			}
 			

@@ -132,7 +132,7 @@ public class ExamEngine implements ExamServer
 	    			  }
 	    			  else{
 	    				  // else user is still active
-	    				  System.out.println("" + studentid + " is still active");
+	    				  // System.out.println("" + studentid + " is still active");
 	    				  loggedintimerHashMap.put(ACCESSTOKEN, true);
 	    			  }
 	    				  
