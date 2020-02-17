@@ -272,49 +272,55 @@ public class GUI extends JFrame implements Serializable {
 				// Following, it repopulates the JList housing assessment objects, resets all pointers
 				// and resets GUI to initial login setup. If all assessments have been completed, the
 				// GUI is cleared and all buttons are disabled
-				
+				if(selectedAns != -1 ) {
 				System.out.println("GUI: Submit was pressed");
-				int out = clientDAO.submitAssessment(token, studentID, assessments.get(ptr));
-				if(out == 1)
-				{
+					int out = clientDAO.submitAssessment(token, studentID, assessments.get(ptr));
+					if(out == 1)
+					{
+						try {
+							assessments.get(ptr).selectAnswer(qPtr, selectedAns);
+							System.out.println("GUI: selected answers added");
+						} catch (InvalidQuestionNumber | InvalidOptionNumber e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						assessments.remove(ptr);
+						model.clear();
+						if(assessments.size()!= 0) {
+							for (int i = 0; i < assessments.size(); i++) {
+								assessmentNames.add(assessments.get(i).getInformation());
+								model.add(i, assessmentNames.get(i));
+							}
+							ptr = 0;
+							qPtr = 0;
+							next.setEnabled(true);
+							availableAssessments.setEnabled(true);
+							submitAnswer.setEnabled(false);
+							optionGroup.clearSelection();
+							selectedAns = -1;
+							nextQuestion(qPtr);
+						}
+						else {
+							assessmentInfo.setText("");
 					
-				assessments.remove(ptr);
-				model.clear();
-				if(assessments.size()!= 0) {
-					for (int i = 0; i < assessments.size(); i++) {
-						assessmentNames.add(assessments.get(i).getInformation());
-						model.add(i, assessmentNames.get(i));
+							questionField.setText("Yay! Looks like you're on top of\nyour work!");
+							option1Text.setText("");
+							option2Text.setText("");
+							option3Text.setText("");
+					
+							submitAnswer.setEnabled(false);
+							option1.setEnabled(false);
+							option2.setEnabled(false);
+							option3.setEnabled(false);
+						}
 					}
-					ptr = 0;
-					qPtr = 0;
-					next.setEnabled(true);
-					availableAssessments.setEnabled(true);
-					submitAnswer.setEnabled(false);
-					optionGroup.clearSelection();
-					selectedAns = -1;
-					nextQuestion(qPtr);
-				}
-				else {
-					assessmentInfo.setText("");
-					
-					questionField.setText("Yay! Looks like you're on top of\nyour work!");
-					option1Text.setText("");
-					option2Text.setText("");
-					option3Text.setText("");
-					
-					submitAnswer.setEnabled(false);
-					option1.setEnabled(false);
-					option2.setEnabled(false);
-					option3.setEnabled(false);
-				}
-				}
-				else
-				{
-					JOptionPane.showMessageDialog(east, "Sorry, cannot submit assessment");
-					//System.out.println("Login timeout");
+					else
+					{
+						JOptionPane.showMessageDialog(east, "Sorry, cannot submit assessment");
+						//System.out.println("Login timeout");
+					}
 				}
 			}
-			
 		});
 		east.add(questions, BorderLayout.CENTER);
 		
