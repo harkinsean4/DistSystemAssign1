@@ -35,7 +35,9 @@ public class ExamEngine implements ExamServer
         courseList.add(COMMSCOURSECODE);
         
         loginHashMap.put(16316271, "fearghal");
+        loginHashMap.put(16484724, "fergy");
         isloggedinHashMap.put(16316271, false);
+        isloggedinHashMap.put(16484724, false);
     }
     
     

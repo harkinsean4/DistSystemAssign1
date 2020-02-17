@@ -56,8 +56,10 @@ public class GUI extends JFrame implements Serializable {
 	
 	private String[] assessments = {"CT414-1", "CT414-2", "EE444-1"};
 	
-	private int studentID = 12345678;
+	private String studentID;
 	private String studentPassword;
+	
+	private int token;
 	
 	private Font boldText = new Font("Arial", Font.BOLD, 18);
 	private Font regText = new Font("Arial", Font.PLAIN, 18);
@@ -313,13 +315,14 @@ public class GUI extends JFrame implements Serializable {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(e.getSource() == loginMo) {
-					System.out.println("login pressed");
+					//System.out.println("login pressed");
 					
-					//will need to retrieve text from boxes in GUI, hardcoded for now
+					token = clientDAO.login(Integer.parseInt(userInput.getText()), passInput.getText());
+					studentID = userInput.getText();
 					
-					clientDAO.login(Integer.parseInt(userInput.getText()), passInput.getText());
-					
-					assessmentPage(frame);
+					if(token != 0) {
+						assessmentPage(frame);
+					}
 				}
 				
 			}
